@@ -3,10 +3,18 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack(spacing: 10) {
-            Text("Styrkr")
+            Image(systemName: "figure.strengthtraining.traditional")
+                .font(.largeTitle)
+                .foregroundColor(.accentColor)
+            
+            Text("STYRKR")
                 .font(.headline)
-            Text("Stories on your wrist")
-                .font(.caption)
+                .fontWeight(.bold)
+            
+            Text("Track Your Strength")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
         }
         .padding()
     }
