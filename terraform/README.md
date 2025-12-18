@@ -1,14 +1,14 @@
 # Styrkr Infrastructure
 
-Production-ready Terraform configuration for the Styrkr storytelling application.
+Production-ready Terraform configuration for the STYRKR strength training application.
 
 ## Architecture
 
 - **API Gateway**: HTTP API with JWT authorization via Cognito
-- **Lambda Functions**: Three microservices (profiles, stories, child_stories)
-- **DynamoDB**: Four tables (users, profiles, stories, story_nodes)
+- **Lambda Functions**: Microservices for workout generation, logging, and profile management
+- **DynamoDB**: Single-table design for users, plans, logs, and exercises
 - **Cognito**: User authentication with Apple and Google OAuth
-- **CloudFront + S3**: Static website hosting
+- **CloudFront + S3**: Static website hosting for React app
 - **Route53**: DNS management
 
 ## Prerequisites
@@ -52,32 +52,30 @@ terraform apply
 ### Shared Layer
 - Common utilities for DynamoDB access
 - JWT token parsing
+- e1RM calculations
 - Response formatting
 
 ### Profiles Lambda
-Handles child profile management:
+Handles user profile and training max management:
 - `GET /me` - Get current user
-- `GET /profiles` - List all profiles
-- `POST /profiles` - Create profile
-- `PUT /profiles/{profileId}` - Update profile
-- `DELETE /profiles/{profileId}` - Delete profile
+- `GET /profile` - Get user profile with 1RMs
+- `PUT /profile` - Update profile
+- `POST /profile/1rm` - Update training maxes
 
-### Stories Lambda
-Manages stories and story nodes:
-- `GET /stories` - List stories by profile
-- `POST /stories` - Create story
-- `GET /stories/{storyId}` - Get story details
-- `PUT /stories/{storyId}` - Update story
-- `DELETE /stories/{storyId}` - Delete story
-- `GET /stories/{storyId}/nodes` - List story nodes
-- `POST /stories/{storyId}/nodes` - Create node
-- `GET /stories/{storyId}/nodes/{nodeId}` - Get node
-- `PUT /stories/{storyId}/nodes/{nodeId}` - Update node
+### Workouts Lambda
+Generates and manages workouts:
+- `GET /plans` - List user's training plans
+- `POST /plans` - Create new plan from template
+- `GET /plans/:id/weeks/:week` - Get workout for week N (rendered on-demand)
+- `POST /plans/:id/overrides` - Create override (swap accessory, move day)
+- `DELETE /plans/:id/overrides/:overrideId` - Remove override
 
-### Child Stories Lambda
-Child-friendly story creation:
-- `POST /stories/child` - Create child story with initial node
-- `POST /stories/{storyId}/continue` - Continue story with choice
+### Logs Lambda
+Workout logging and analytics:
+- `GET /logs` - List workout logs (paginated)
+- `POST /logs` - Submit completed workout
+- `GET /logs/:id` - Get log details
+- `GET /analytics/e1rm` - Get e1RM trend data
 
 ## Security
 

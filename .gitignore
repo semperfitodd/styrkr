@@ -9,6 +9,7 @@
 # secrets
 **/Secrets.plist
 **/GoogleService-Info.plist
+Secrets.swift
 
 # .tfstate static_site
 *.tfstate
@@ -25,6 +26,7 @@ archives/
 .cursor/
 .idea
 .iml
+.build
 
 # Mac OS
 .DS_Store
