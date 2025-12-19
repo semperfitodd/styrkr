@@ -2,6 +2,10 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
+    @State private var showProfile = false
+    @State private var showQuestionnaire = false
+    @State private var hasProfile: Bool?
+    @State private var isCheckingProfile = true
     
     var body: some View {
         NavigationView {
@@ -100,6 +104,48 @@ struct HomeView: View {
                         .padding(.bottom, 40)
                     }
                 }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showProfile = true }) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            .sheet(isPresented: $showProfile) {
+                ProfileView()
+            }
+            .sheet(isPresented: $showQuestionnaire) {
+                ProfileQuestionnaireView()
+            }
+            .task {
+                await checkProfile()
+            }
+        }
+    }
+    
+    func checkProfile() async {
+        isCheckingProfile = true
+        
+        do {
+            _ = try await APIClient.shared.getProfile()
+            await MainActor.run {
+                hasProfile = true
+                isCheckingProfile = false
+            }
+        } catch APIError.notFound {
+            await MainActor.run {
+                hasProfile = false
+                isCheckingProfile = false
+                showQuestionnaire = true
+            }
+        } catch {
+            await MainActor.run {
+                hasProfile = nil
+                isCheckingProfile = false
             }
         }
     }

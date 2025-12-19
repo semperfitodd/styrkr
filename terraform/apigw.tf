@@ -58,7 +58,43 @@ module "api_gateway" {
       authorizer_key     = "cognito"
       integration = {
         method                 = "POST"
-        uri                    = module.lambda_temp.lambda_function_arn
+        uri                    = module.lambda_hello.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "GET /profile" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_profile.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "PUT /profile" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_profile.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "GET /strength" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_strength.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "PUT /strength" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_strength.lambda_function_arn
         payload_format_version = "2.0"
       }
     }

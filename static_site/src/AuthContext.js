@@ -16,21 +16,49 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const decodeIdToken = (idToken) => {
-    const payload = JSON.parse(atob(idToken.split('.')[1]));
-    return {
-      name: payload.name || payload.email || 'User',
-      email: payload.email || '',
-      provider: payload.identities?.[0]?.providerName || 'cognito'
-    };
+    try {
+      const payload = JSON.parse(atob(idToken.split('.')[1]));
+      const givenName = payload.given_name || '';
+      const familyName = payload.family_name || '';
+      const fullName = givenName && familyName ? `${givenName} ${familyName}` : givenName || payload.name || payload.email || 'User';
+      
+      return {
+        name: fullName,
+        email: payload.email || '',
+        provider: payload.identities?.[0]?.providerName || 'cognito',
+        exp: payload.exp
+      };
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const decoded = decodeIdToken(token);
+      if (!decoded || !decoded.exp) return true;
+      // Check if token expires in the next 5 minutes
+      return decoded.exp * 1000 < Date.now() + 5 * 60 * 1000;
+    } catch (err) {
+      return true;
+    }
   };
 
   const checkAuthStatus = async () => {
     try {
       const idToken = sessionStorage.getItem('id_token');
       
-      if (idToken) {
+      if (idToken && !isTokenExpired(idToken)) {
         setUser(decodeIdToken(idToken));
       } else {
+        // Token is expired or missing, clear it
+        if (idToken) {
+          sessionStorage.removeItem('id_token');
+          sessionStorage.removeItem('access_token');
+          sessionStorage.removeItem('refresh_token');
+        }
+        
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         

@@ -11,6 +11,38 @@
   justify-content: center;
   padding: 2rem;
   color: white;
+  position: relative;
+}
+
+.header-top {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.settings-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  padding: 0;
+}
+
+.settings-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.settings-button:active {
+  transform: rotate(90deg) scale(0.95);
 }
 
 .welcome-section {
@@ -92,10 +124,18 @@
   line-height: 1.6;
 }
 
-.logout-button {
+.action-buttons {
+  display: flex;
+  gap: 1rem;
   margin-top: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeIn 1s ease-in 0.4s both;
+}
+
+.profile-button,
+.logout-button {
   padding: 0.75rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -104,7 +144,20 @@
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-  animation: fadeIn 1s ease-in 0.4s both;
+}
+
+.profile-button {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.profile-button:hover {
+  background: rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.logout-button {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .logout-button:hover {
@@ -113,6 +166,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.profile-button:active,
 .logout-button:active {
   transform: translateY(0);
 }

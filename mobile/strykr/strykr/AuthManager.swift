@@ -93,8 +93,24 @@ class AuthManager: NSObject, ObservableObject {
             
             if let userInfo = decodeJWT(tokenResponse.id_token) {
                 await MainActor.run {
+                    let givenName = userInfo["given_name"] as? String ?? ""
+                    let familyName = userInfo["family_name"] as? String ?? ""
+                    let fullName: String
+                    
+                    if !givenName.isEmpty && !familyName.isEmpty {
+                        fullName = "\(givenName) \(familyName)"
+                    } else if !givenName.isEmpty {
+                        fullName = givenName
+                    } else if let name = userInfo["name"] as? String {
+                        fullName = name
+                    } else if let email = userInfo["email"] as? String {
+                        fullName = email
+                    } else {
+                        fullName = "User"
+                    }
+                    
                     self.user = User(
-                        name: userInfo["name"] as? String ?? userInfo["email"] as? String ?? "User",
+                        name: fullName,
                         email: userInfo["email"] as? String ?? "",
                         provider: provider
                     )
