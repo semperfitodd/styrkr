@@ -1,8 +1,0 @@
-.terraform/
-.terraform.lock.hcl
-*.tfstate
-*.tfstate.*
-*.tfvars.json
-.env
-lambda_shared.zip
-

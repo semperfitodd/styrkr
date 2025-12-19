@@ -1,6 +1,47 @@
 # STYRKR
 
-Strength training app with AWS Cognito authentication. Built with React (web) and SwiftUI (iOS).
+## What Styrkr Does
+
+Styrkr helps you get stronger over time—without breaking your body or your life.
+
+You enter your current strength numbers, choose how many days you train, and Styrkr builds a structured strength plan that adapts to travel, missed days, and changing needs—while keeping long-term progress intact.
+
+Unlike workout trackers that just record what you did, Styrkr tells you what to do next, based on proven strength programming and your actual training history.
+
+## What You Get as a User
+### A real strength plan, not random workouts
+
+Styrkr generates a complete, long-term strength program based on your lifts. You can view any future week at any time and always know what’s coming next.
+
+### Freedom without breaking the program
+
+Travel or miss a day? You can move workouts within the week without ruining progression or recovery. The plan adapts to real life instead of forcing you into a rigid calendar.
+
+### Smart exercise substitutions
+
+If you can’t (or shouldn’t) do a certain accessory movement, Styrkr lets you swap it for another that serves the same purpose—without turning your program into chaos.
+
+### Strength progress you can actually trust
+
+Styrkr tracks estimated 1RM trends, training maxes, volume, and consistency so you can see whether you’re getting stronger over time—not just chasing one-off PRs.
+
+### Mobility that’s measured, not guessed
+
+Mobility work is built into your schedule and tracked with simple, repeatable tests—especially for hips—so you can see real improvement instead of relying on how things “feel.”
+
+### Built for long-term use
+
+Styrkr is designed for people who want to train hard for years. It prioritizes consistency, recovery, and durability so strength keeps going up as you age.
+
+## Who Styrkr Is For
+
+Styrkr is for lifters who:
+
+* Care about increasing their total strength
+* Train 3–6 days per week
+* Travel or have unpredictable schedules
+* Want structure without rigidity 
+* Value longevity as much as performance
 
 ## Tech Stack
 
