@@ -72,6 +72,36 @@ class APIClient {
     func updateProfile(_ profile: Profile) async throws -> Profile {
         return try await makeRequest(endpoint: "/profile", method: "PUT", body: profile)
     }
+    
+    func getStrength() async throws -> StrengthData {
+        return try await makeRequest(endpoint: "/strength", method: "GET")
+    }
+    
+    func updateStrength(_ strengthData: StrengthData) async throws -> StrengthData {
+        return try await makeRequest(endpoint: "/strength", method: "PUT", body: strengthData)
+    }
+    
+    func getWorkouts(startDate: String? = nil, endDate: String? = nil) async throws -> WorkoutHistoryResponse {
+        var endpoint = "/workout"
+        var queryParams: [String] = []
+        
+        if let start = startDate {
+            queryParams.append("startDate=\(start)")
+        }
+        if let end = endDate {
+            queryParams.append("endDate=\(end)")
+        }
+        
+        if !queryParams.isEmpty {
+            endpoint += "?" + queryParams.joined(separator: "&")
+        }
+        
+        return try await makeRequest(endpoint: endpoint, method: "GET")
+    }
+    
+    func logWorkout(_ workout: WorkoutData) async throws -> WorkoutData {
+        return try await makeRequest(endpoint: "/workout", method: "POST", body: workout)
+    }
 }
 
 enum APIError: LocalizedError {

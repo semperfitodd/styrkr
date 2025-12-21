@@ -45,9 +45,9 @@ Styrkr is for lifters who:
 
 ## Tech Stack
 
-- **Frontend**: React 19, pure Cognito OAuth (no Amplify)
+- **Frontend**: React 19, pure Cognito OAuth
 - **Mobile**: SwiftUI (iOS 18+)
-- **Backend**: AWS Lambda (Node.js 20, TypeScript)
+- **Backend**: AWS Lambda (Python 3.13)
 - **API**: API Gateway HTTP API
 - **Auth**: AWS Cognito with Google OAuth & Apple Sign In
 - **Database**: DynamoDB
@@ -194,14 +194,14 @@ Open `mobile/strykr/strykr.xcodeproj` in Xcode and run.
 
 ```
 styrkr/
-├── mobile/strykr/           # iOS app
-│   ├── strykr/              # iOS target
-│   └── strykr.xcodeproj/
+├── app_config/              # Exercise library & program templates
+├── mobile/strykr/           # iOS app (SwiftUI)
 ├── static_site/             # React web app
-│   ├── src/
-│   ├── public/
-│   └── build/
 └── terraform/               # Infrastructure
-    ├── *.tf
-    └── lambda_temp/         # Lambda functions
+    ├── lambdas/             # Python Lambda functions
+    │   ├── shared/          # Shared utilities
+    │   ├── profile/         # User profile management
+    │   ├── strength/        # 1RM & training max tracking
+    │   └── workout/         # Workout history
+    └── *.tf                 # Terraform configs
 ```

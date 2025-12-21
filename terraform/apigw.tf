@@ -89,6 +89,24 @@ module "api_gateway" {
         payload_format_version = "2.0"
       }
     }
+    "GET /workout" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_workout.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "POST /workout" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_workout.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
   }
 
   tags = var.tags

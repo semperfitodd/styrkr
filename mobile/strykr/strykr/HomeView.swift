@@ -4,6 +4,7 @@ struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
     @State private var showProfile = false
     @State private var showExerciseLibrary = false
+    @State private var showProgram = false
     @State private var userProfile: Profile?
     @State private var showQuestionnaire = false
     @State private var hasProfile: Bool?
@@ -53,6 +54,15 @@ struct HomeView: View {
                         
                         // Features
                         VStack(spacing: 20) {
+                            Button(action: { showProgram = true }) {
+                                FeatureCard(
+                                    icon: "calendar",
+                                    title: "Training Program",
+                                    description: "View your 12-week 5/3/1 Krypteia program",
+                                    isClickable: true
+                                )
+                            }
+                            
                             Button(action: { showExerciseLibrary = true }) {
                                 FeatureCard(
                                     icon: "book.fill",
@@ -66,12 +76,6 @@ struct HomeView: View {
                                 icon: "chart.line.uptrend.xyaxis",
                                 title: "Track Your Progress",
                                 description: "Log workouts and monitor your strength gains over time"
-                            )
-                            
-                            FeatureCard(
-                                icon: "target",
-                                title: "Set Goals",
-                                description: "Define and achieve your fitness objectives"
                             )
                         }
                         .padding(.horizontal, 20)
@@ -131,6 +135,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showExerciseLibrary) {
                 ExerciseLibraryView(userProfile: userProfile)
+            }
+            .fullScreenCover(isPresented: $showProgram) {
+                ProgramView()
             }
             .task {
                 await checkProfile()

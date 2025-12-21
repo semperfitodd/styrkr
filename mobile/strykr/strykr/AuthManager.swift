@@ -182,7 +182,10 @@ extension AuthManager: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
-            return ASPresentationAnchor()
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                return ASPresentationAnchor(windowScene: windowScene)
+            }
+            fatalError("No window scene available")
         }
         return window
     }
