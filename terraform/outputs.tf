@@ -27,3 +27,18 @@ output "oauth_secrets_arn" {
   description = "ARN of the OAuth credentials secret in Secrets Manager"
   value       = aws_secretsmanager_secret.oauth_credentials.arn
 }
+
+output "config_bucket_name" {
+  description = "S3 bucket name for config snapshots"
+  value       = module.config_s3_bucket.s3_bucket_id
+}
+
+output "config_table_name" {
+  description = "DynamoDB table name for config data"
+  value       = aws_dynamodb_table.config.name
+}
+
+output "library_latest_url" {
+  description = "CloudFront URL for latest exercise library"
+  value       = "https://${local.domain_name}/config/exercises.latest.json"
+}

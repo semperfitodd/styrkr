@@ -6,9 +6,9 @@ Production-ready Terraform configuration for the STYRKR strength training applic
 
 - **API Gateway**: HTTP API with JWT authorization via Cognito
 - **Lambda Functions**: Microservices for workout generation, logging, and profile management
-- **DynamoDB**: Single-table design for users, plans, logs, and exercises
+- **DynamoDB**: Two tables - user data (main) and app config (exercise library)
 - **Cognito**: User authentication with Apple and Google OAuth
-- **CloudFront + S3**: Static website hosting for React app
+- **CloudFront + S3**: Static website hosting + public exercise library JSON
 - **Route53**: DNS management
 
 ## Prerequisites
@@ -49,33 +49,18 @@ terraform apply
 
 ## Lambda Functions
 
-### Shared Layer
-- Common utilities for DynamoDB access
-- JWT token parsing
-- e1RM calculations
-- Response formatting
+### Profile Lambda
+- `GET /profile` - Get user profile
+- `PUT /profile` - Update profile (training days, units, constraints, capabilities)
 
-### Profiles Lambda
-Handles user profile and training max management:
-- `GET /me` - Get current user
-- `GET /profile` - Get user profile with 1RMs
-- `PUT /profile` - Update profile
-- `POST /profile/1rm` - Update training maxes
+### Strength Lambda
+- `GET /strength` - Get strength data (1RMs, training maxes)
+- `PUT /strength` - Update strength data
 
-### Workouts Lambda
-Generates and manages workouts:
-- `GET /plans` - List user's training plans
-- `POST /plans` - Create new plan from template
-- `GET /plans/:id/weeks/:week` - Get workout for week N (rendered on-demand)
-- `POST /plans/:id/overrides` - Create override (swap accessory, move day)
-- `DELETE /plans/:id/overrides/:overrideId` - Remove override
-
-### Logs Lambda
-Workout logging and analytics:
-- `GET /logs` - List workout logs (paginated)
-- `POST /logs` - Submit completed workout
-- `GET /logs/:id` - Get log details
-- `GET /analytics/e1rm` - Get e1RM trend data
+### Library Publisher Lambda
+- `POST /admin/library/publish` - Generate exercise library snapshot to S3 (JWT required)
+- Reads exercises from DynamoDB, creates versioned + latest JSON files
+- Publishes to S3 with CloudFront cache headers
 
 ## Security
 
@@ -86,23 +71,40 @@ Workout logging and analytics:
 - Point-in-time recovery enabled for all tables
 - CloudWatch logs with 7-day retention
 
-## Development
+## Exercise Library
 
-Lambda functions use TypeScript with strict mode enabled. The shared layer provides common utilities to keep code DRY.
+120+ exercises for 5/3/1 Krypteia + longevity program stored in DynamoDB and auto-published to CloudFront.
 
-To test locally:
+### Seed Exercises
 ```bash
-cd lambda_profiles
-npm install
-npm run build
+cd scripts
+export CONFIG_TABLE_NAME=styrkr_app_config
+./seed_exercise_library.sh
 ```
+
+Library automatically publishes to S3 within 30 seconds of any DynamoDB changes via DynamoDB Streams.
+
+### Manual Publish (Optional)
+```bash
+curl -X POST https://dev-api.yourdomain.com/admin/library/publish \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Access Library
+- Latest: `https://dev.yourdomain.com/config/exercises.latest.json`
+- Versioned: `https://dev.yourdomain.com/config/exercises.v{N}.json`
+
+**Auto-publish:** DynamoDB Stream triggers publish on INSERT/MODIFY/REMOVE with 30s debounce.  
+**Manual publish:** Available for immediate updates (bypasses debounce).
 
 ## Outputs
 
 After applying, Terraform outputs:
 - `api_url` - API Gateway custom domain
 - `frontend_url` - CloudFront website URL
+- `library_latest_url` - Exercise library CloudFront URL
+- `config_bucket_name` - S3 bucket for config snapshots
+- `config_table_name` - DynamoDB table for exercises
 - `cognito_user_pool_id` - Cognito User Pool ID
 - `cognito_client_id` - Cognito Client ID
 - `cognito_domain` - Cognito custom domain
-- `oauth_secrets_arn` - Secrets Manager ARN

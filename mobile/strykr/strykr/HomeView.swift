@@ -3,6 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
     @State private var showProfile = false
+    @State private var showExerciseLibrary = false
+    @State private var userProfile: Profile?
     @State private var showQuestionnaire = false
     @State private var hasProfile: Bool?
     @State private var isCheckingProfile = true
@@ -51,6 +53,15 @@ struct HomeView: View {
                         
                         // Features
                         VStack(spacing: 20) {
+                            Button(action: { showExerciseLibrary = true }) {
+                                FeatureCard(
+                                    icon: "book.fill",
+                                    title: "Exercise Library",
+                                    description: "Browse 120+ exercises for 5/3/1 Krypteia + longevity",
+                                    isClickable: true
+                                )
+                            }
+                            
                             FeatureCard(
                                 icon: "chart.line.uptrend.xyaxis",
                                 title: "Track Your Progress",
@@ -61,12 +72,6 @@ struct HomeView: View {
                                 icon: "target",
                                 title: "Set Goals",
                                 description: "Define and achieve your fitness objectives"
-                            )
-                            
-                            FeatureCard(
-                                icon: "chart.bar.fill",
-                                title: "Analyze Performance",
-                                description: "Get insights into your training patterns and improvements"
                             )
                         }
                         .padding(.horizontal, 20)
@@ -106,6 +111,9 @@ struct HomeView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color(hex: "1a1a1a"), for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showProfile = true }) {
@@ -121,6 +129,9 @@ struct HomeView: View {
             .sheet(isPresented: $showQuestionnaire) {
                 ProfileQuestionnaireView()
             }
+            .sheet(isPresented: $showExerciseLibrary) {
+                ExerciseLibraryView(userProfile: userProfile)
+            }
             .task {
                 await checkProfile()
             }
@@ -131,8 +142,9 @@ struct HomeView: View {
         isCheckingProfile = true
         
         do {
-            _ = try await APIClient.shared.getProfile()
+            let profile = try await APIClient.shared.getProfile()
             await MainActor.run {
+                self.userProfile = profile
                 hasProfile = true
                 isCheckingProfile = false
             }
@@ -155,6 +167,7 @@ struct FeatureCard: View {
     let icon: String
     let title: String
     let description: String
+    var isClickable: Bool = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
@@ -177,11 +190,23 @@ struct FeatureCard: View {
             Spacer()
         }
         .padding()
-        .background(Color.white.opacity(0.05))
+        .background(
+            isClickable ?
+            LinearGradient(
+                gradient: Gradient(colors: [Color(hex: "667eea").opacity(0.2), Color(hex: "764ba2").opacity(0.2)]),
+                startPoint: .leading,
+                endPoint: .trailing
+            ) :
+            LinearGradient(
+                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.05)]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
         .cornerRadius(15)
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(isClickable ? Color(hex: "667eea").opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
         )
     }
 }

@@ -2,18 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import './ProfileView.css';
 
-const COMMON_CONSTRAINTS = [
-  'no_lunges',
-  'no_deep_knee_flexion',
-  'no_overhead',
-  'no_barbell_back_squat',
-  'no_jumping',
-  'no_running',
-  'low_back_issues',
-  'shoulder_issues',
-  'knee_issues',
-];
-
 function ProfileView({ onClose }) {
   const [mode, setMode] = useState('view'); // view or edit
   const [loading, setLoading] = useState(true);
@@ -22,8 +10,6 @@ function ProfileView({ onClose }) {
   
   const [profile, setProfile] = useState(null);
   const [editedProfile, setEditedProfile] = useState(null);
-  
-  const [customConstraint, setCustomConstraint] = useState('');
 
   useEffect(() => {
     loadData();
@@ -74,48 +60,6 @@ function ProfileView({ onClose }) {
     setEditedProfile({ ...editedProfile, [field]: value });
   };
 
-  const handleMovementCapabilityChange = (field, value) => {
-    setEditedProfile({
-      ...editedProfile,
-      movementCapabilities: {
-        ...editedProfile.movementCapabilities,
-        [field]: value,
-      },
-    });
-  };
-
-
-  const toggleConstraint = (constraint) => {
-    if (editedProfile.constraints.includes(constraint)) {
-      setEditedProfile({
-        ...editedProfile,
-        constraints: editedProfile.constraints.filter((c) => c !== constraint),
-      });
-    } else {
-      setEditedProfile({
-        ...editedProfile,
-        constraints: [...editedProfile.constraints, constraint],
-      });
-    }
-  };
-
-  const addCustomConstraint = () => {
-    if (customConstraint.trim() && !editedProfile.constraints.includes(customConstraint.trim())) {
-      setEditedProfile({
-        ...editedProfile,
-        constraints: [...editedProfile.constraints, customConstraint.trim()],
-      });
-      setCustomConstraint('');
-    }
-  };
-
-  const removeConstraint = (constraint) => {
-    setEditedProfile({
-      ...editedProfile,
-      constraints: editedProfile.constraints.filter((c) => c !== constraint),
-    });
-  };
-
   if (loading) {
     return (
       <div className="profile-view">
@@ -145,10 +89,7 @@ function ProfileView({ onClose }) {
       <div className="profile-container">
         <div className="profile-header">
           <button onClick={onClose} className="close-button" aria-label="Close">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            ✕
           </button>
           <h1>Your Profile</h1>
           <div className="profile-actions">
@@ -255,9 +196,9 @@ function ProfileView({ onClose }) {
               <div className="info-grid">
                 <div className="info-item">
                   <span className="label">Programming:</span>
-                  <span className="value">{currentProfile.includeNonLiftingDays ? 'Enabled' : 'Disabled'}</span>
+                  <span className="value">{currentProfile.nonLiftingDaysEnabled ? 'Enabled' : 'Disabled'}</span>
                 </div>
-                {currentProfile.includeNonLiftingDays && (
+                {currentProfile.nonLiftingDaysEnabled && (
                   <>
                     <div className="info-item">
                       <span className="label">Mode:</span>
@@ -276,13 +217,13 @@ function ProfileView({ onClose }) {
                   <label className="checkbox-label">
                     <input
                       type="checkbox"
-                      checked={currentProfile.includeNonLiftingDays}
-                      onChange={(e) => handleProfileChange('includeNonLiftingDays', e.target.checked)}
+                      checked={currentProfile.nonLiftingDaysEnabled}
+                      onChange={(e) => handleProfileChange('nonLiftingDaysEnabled', e.target.checked)}
                     />
                     Include non-lifting day programming
                   </label>
                 </div>
-                {currentProfile.includeNonLiftingDays && (
+                {currentProfile.nonLiftingDaysEnabled && (
                   <>
                     <div className="form-group">
                       <label>Non-Lifting Day Mode</label>
@@ -330,118 +271,6 @@ function ProfileView({ onClose }) {
                       </div>
                     </div>
                   </>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Movement Capabilities */}
-          <div className="section">
-            <h2>Movement Capabilities</h2>
-            {mode === 'view' ? (
-              <div className="capability-list">
-                <div className="capability-item">
-                  <span>Pull-ups:</span>
-                  <span>{currentProfile.movementCapabilities?.pullups ? '✓' : '✗'}</span>
-                </div>
-                <div className="capability-item">
-                  <span>Ring Dips:</span>
-                  <span>{currentProfile.movementCapabilities?.ringDips ? '✓' : '✗'}</span>
-                </div>
-                <div className="capability-item">
-                  <span>Muscle-ups:</span>
-                  <span>{currentProfile.movementCapabilities?.muscleUps || 'none'}</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="form-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={currentProfile.movementCapabilities?.pullups}
-                      onChange={(e) => handleMovementCapabilityChange('pullups', e.target.checked)}
-                    />
-                    Pull-ups
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={currentProfile.movementCapabilities?.ringDips}
-                      onChange={(e) => handleMovementCapabilityChange('ringDips', e.target.checked)}
-                    />
-                    Ring Dips
-                  </label>
-                </div>
-                <div className="form-group">
-                  <label>Muscle-ups</label>
-                  <select
-                    value={currentProfile.movementCapabilities?.muscleUps}
-                    onChange={(e) => handleMovementCapabilityChange('muscleUps', e.target.value)}
-                  >
-                    <option value="none">None</option>
-                    <option value="bar">Bar Muscle-ups</option>
-                    <option value="rings">Ring Muscle-ups</option>
-                  </select>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Constraints */}
-          <div className="section">
-            <h2>Movement Constraints</h2>
-            {mode === 'view' ? (
-              currentProfile.constraints?.length > 0 ? (
-                <div className="chip-list">
-                  {currentProfile.constraints.map((constraint) => (
-                    <span key={constraint} className="badge">
-                      {constraint.replace(/_/g, ' ')}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted">No constraints</p>
-              )
-            ) : (
-              <>
-                <div className="chip-list">
-                  {COMMON_CONSTRAINTS.map((constraint) => (
-                    <button
-                      key={constraint}
-                      type="button"
-                      className={`chip ${currentProfile.constraints?.includes(constraint) ? 'active' : ''}`}
-                      onClick={() => toggleConstraint(constraint)}
-                    >
-                      {constraint.replace(/_/g, ' ')}
-                    </button>
-                  ))}
-                </div>
-                <div className="custom-constraint mt-2">
-                  <input
-                    type="text"
-                    placeholder="Add custom constraint"
-                    value={customConstraint}
-                    onChange={(e) => setCustomConstraint(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomConstraint())}
-                  />
-                  <button type="button" onClick={addCustomConstraint} className="btn-ghost">
-                    Add
-                  </button>
-                </div>
-                {currentProfile.constraints?.length > 0 && (
-                  <div className="chip-list mt-2">
-                    {currentProfile.constraints.map((constraint) => (
-                      <span key={constraint} className="badge badge-removable">
-                        {constraint.replace(/_/g, ' ')}
-                        <button type="button" className="badge-remove" onClick={() => removeConstraint(constraint)}>
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
                 )}
               </>
             )}
