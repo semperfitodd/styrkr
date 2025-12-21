@@ -117,3 +117,4 @@ static let apiBaseURL = "https://styrkr-app-api.bernsonllc.com"
 - Consistent error handling
 - Follows iOS design patterns
 
+

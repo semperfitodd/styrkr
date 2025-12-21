@@ -7,30 +7,22 @@ def validate_profile(profile: dict) -> Tuple[bool, str | None]:
     if profile.get('preferredUnits') not in ['lb', 'kg']:
         return False, "preferredUnits must be 'lb' or 'kg'"
     
-    if not isinstance(profile.get('includeNonLiftingDays'), bool):
-        return False, "includeNonLiftingDays must be a boolean"
+    if not isinstance(profile.get('nonLiftingDaysEnabled'), bool):
+        return False, "nonLiftingDaysEnabled must be a boolean"
     
     valid_modes = ['pilates', 'conditioning', 'gpp', 'mobility', 'rest']
     if profile.get('nonLiftingDayMode') not in valid_modes:
         return False, f"nonLiftingDayMode must be one of: {', '.join(valid_modes)}"
     
-    if not isinstance(profile.get('constraints'), list):
-        return False, "constraints must be an array"
-    
-    if profile.get('conditioningLevel') and profile['conditioningLevel'] not in ['low', 'moderate', 'high']:
+    if not profile.get('conditioningLevel') or profile['conditioningLevel'] not in ['low', 'moderate', 'high']:
         return False, "conditioningLevel must be one of: low, moderate, high"
     
-    if profile.get('preferredStartDay'):
-        valid_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-        if profile['preferredStartDay'] not in valid_days:
-            return False, "preferredStartDay must be a valid day abbreviation"
+    if not profile.get('preferredStartDay'):
+        return False, "preferredStartDay is required"
     
-    if profile.get('movementCapabilities'):
-        mc = profile['movementCapabilities']
-        if not isinstance(mc.get('pullups'), bool) or not isinstance(mc.get('ringDips'), bool):
-            return False, "movementCapabilities.pullups and ringDips must be booleans"
-        if mc.get('muscleUps') not in ['none', 'bar', 'rings']:
-            return False, "movementCapabilities.muscleUps must be: none, bar, or rings"
+    valid_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+    if profile['preferredStartDay'] not in valid_days:
+        return False, "preferredStartDay must be a valid day abbreviation"
     
     return True, None
 

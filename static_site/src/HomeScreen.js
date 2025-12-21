@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import ProfileView from './components/ProfileView';
+import ExerciseLibrary from './components/ExerciseLibrary';
+import { api } from './api/client';
 import './HomeScreen.css';
 
 function HomeScreen() {
   const { user, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
+  const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const profile = await api.getProfile();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    }
+  };
 
   return (
     <div className="home-screen">
@@ -27,6 +44,11 @@ function HomeScreen() {
         </div>
 
         <div className="features">
+          <div className="feature clickable" onClick={() => setShowExerciseLibrary(true)}>
+            <h3>📚 Exercise Library</h3>
+            <p>Browse 120+ exercises for 5/3/1 Krypteia + longevity</p>
+            <span className="feature-link">View Library →</span>
+          </div>
           <div className="feature">
             <h3>💪 Track Your Progress</h3>
             <p>Log workouts and monitor your strength gains over time</p>
@@ -34,10 +56,6 @@ function HomeScreen() {
           <div className="feature">
             <h3>🎯 Set Goals</h3>
             <p>Define and achieve your fitness objectives</p>
-          </div>
-          <div className="feature">
-            <h3>📊 Analyze Performance</h3>
-            <p>Get insights into your training patterns and improvements</p>
           </div>
         </div>
 
@@ -54,6 +72,12 @@ function HomeScreen() {
       </header>
 
       {showProfile && <ProfileView onClose={() => setShowProfile(false)} />}
+      {showExerciseLibrary && (
+        <ExerciseLibrary 
+          onClose={() => setShowExerciseLibrary(false)} 
+          userProfile={userProfile}
+        />
+      )}
     </div>
   );
 }

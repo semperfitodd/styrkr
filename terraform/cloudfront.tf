@@ -25,6 +25,12 @@ module "cdn" {
       signing_behavior = "always"
       signing_protocol = "sigv4"
     }
+    "config" = {
+      description      = "Config bucket CloudFront access to S3"
+      origin_type      = "s3"
+      signing_behavior = "always"
+      signing_protocol = "sigv4"
+    }
   }
   custom_error_response = [
     {
@@ -46,6 +52,10 @@ module "cdn" {
       domain_name           = module.site_s3_bucket.s3_bucket_bucket_domain_name
       origin_access_control = local.domain_name
     }
+    s3_config = {
+      domain_name           = module.config_s3_bucket.s3_bucket_bucket_domain_name
+      origin_access_control = "config"
+    }
   }
 
   default_cache_behavior = {
@@ -57,6 +67,27 @@ module "cdn" {
     compress        = true
     query_string    = true
   }
+
+  ordered_cache_behavior = [
+    {
+      path_pattern           = "/config/*"
+      target_origin_id       = "s3_config"
+      viewer_protocol_policy = "redirect-to-https"
+
+      allowed_methods = ["GET", "HEAD", "OPTIONS"]
+      cached_methods  = ["GET", "HEAD"]
+      compress        = true
+
+      use_forwarded_values = true
+      query_string         = false
+      headers              = []
+      cookies_forward      = "none"
+
+      min_ttl     = 0
+      default_ttl = 300
+      max_ttl     = 31536000
+    }
+  ]
 
   viewer_certificate = {
     acm_certificate_arn = aws_acm_certificate.site.arn

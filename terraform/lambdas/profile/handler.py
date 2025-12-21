@@ -22,6 +22,15 @@ def get_profile(user_id: str, user_email: str, request_id: str) -> dict:
         
         item.pop('userEmail', None)
         item.pop('dataType', None)
+        
+        # Remove deprecated fields
+        item.pop('constraints', None)
+        item.pop('movementCapabilities', None)
+        
+        # Ensure trainingDaysPerWeek is an integer
+        if 'trainingDaysPerWeek' in item:
+            item['trainingDaysPerWeek'] = int(item['trainingDaysPerWeek'])
+        
         return success_response(200, item)
     
     except Exception as e:
@@ -48,16 +57,10 @@ def put_profile(user_id: str, user_email: str, user_name: str, body: dict, reque
             'name': user_name,
             'trainingDaysPerWeek': int(body['trainingDaysPerWeek']),
             'preferredUnits': body['preferredUnits'],
-            'includeNonLiftingDays': body['includeNonLiftingDays'],
+            'nonLiftingDaysEnabled': body['nonLiftingDaysEnabled'],
             'nonLiftingDayMode': body['nonLiftingDayMode'],
-            'constraints': body['constraints'],
             'conditioningLevel': body.get('conditioningLevel', 'moderate'),
-            'preferredStartDay': body.get('preferredStartDay'),
-            'movementCapabilities': body.get('movementCapabilities', {
-                'pullups': False,
-                'ringDips': False,
-                'muscleUps': 'none'
-            }),
+            'preferredStartDay': body.get('preferredStartDay', 'mon'),
             'createdAt': existing.get('createdAt', now),
             'updatedAt': now
         }

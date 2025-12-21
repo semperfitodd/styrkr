@@ -8,19 +8,6 @@ struct ProfileView: View {
     @State private var isSaving = false
     @State private var isEditing = false
     @State private var errorMessage: String?
-    @State private var customConstraint = ""
-    
-    let commonConstraints = [
-        "no_lunges",
-        "no_deep_knee_flexion",
-        "no_overhead",
-        "no_barbell_back_squat",
-        "no_jumping",
-        "no_running",
-        "low_back_issues",
-        "shoulder_issues",
-        "knee_issues"
-    ]
     
     var body: some View {
         NavigationView {
@@ -115,40 +102,15 @@ struct ProfileView: View {
                 profileSection(title: "Training Schedule") {
                     infoRow(label: "Training Days/Week", value: "\(profile.trainingDaysPerWeek) days")
                     infoRow(label: "Preferred Units", value: profile.preferredUnits.uppercased())
-                    if let startDay = profile.preferredStartDay {
-                        infoRow(label: "Start Day", value: startDay.capitalized)
-                    }
+                    infoRow(label: "Start Day", value: profile.preferredStartDay.capitalized)
                 }
                 
                 profileSection(title: "Non-Lifting Days") {
-                    infoRow(label: "Include Non-Lifting Days", value: profile.includeNonLiftingDays ? "Yes" : "No")
-                    if profile.includeNonLiftingDays {
+                    infoRow(label: "Include Non-Lifting Days", value: profile.nonLiftingDaysEnabled ? "Yes" : "No")
+                    if profile.nonLiftingDaysEnabled {
                         infoRow(label: "Mode", value: profile.nonLiftingDayMode.capitalized)
                         infoRow(label: "Conditioning Level", value: profile.conditioningLevel.capitalized)
                     }
-                }
-                
-                profileSection(title: "Physical Constraints") {
-                    if profile.constraints.isEmpty {
-                        Text("No constraints")
-                            .foregroundColor(.gray)
-                    } else {
-                        ForEach(profile.constraints, id: \.self) { constraint in
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color(hex: "667eea"))
-                                Text(constraint.replacingOccurrences(of: "_", with: " ").capitalized)
-                                    .foregroundColor(.white)
-                                Spacer()
-                            }
-                        }
-                    }
-                }
-                
-                profileSection(title: "Movement Capabilities") {
-                    infoRow(label: "Pull-ups", value: profile.movementCapabilities.pullups ? "Yes" : "No")
-                    infoRow(label: "Ring Dips", value: profile.movementCapabilities.ringDips ? "Yes" : "No")
-                    infoRow(label: "Muscle-ups", value: profile.movementCapabilities.muscleUps.capitalized)
                 }
             }
         }
@@ -164,7 +126,7 @@ struct ProfileView: View {
                             .foregroundColor(.white)
                             .fontWeight(.semibold)
                         Picker("Days", selection: profile.trainingDaysPerWeek) {
-                            ForEach(3...7, id: \.self) { days in
+                            ForEach(3...6, id: \.self) { days in
                                 Text("\(days) days").tag(days)
                             }
                         }
@@ -183,7 +145,7 @@ struct ProfileView: View {
                             .foregroundColor(.white)
                             .fontWeight(.semibold)
                         Picker("Start Day", selection: Binding(
-                            get: { profile.wrappedValue.preferredStartDay ?? "mon" },
+                            get: { profile.wrappedValue.preferredStartDay },
                             set: { profile.wrappedValue.preferredStartDay = $0 }
                         )) {
                             Text("Monday").tag("mon")
@@ -203,90 +165,33 @@ struct ProfileView: View {
                 
                 profileSection(title: "Non-Lifting Days") {
                     VStack(alignment: .leading, spacing: 15) {
-                        Toggle("Include Non-Lifting Days", isOn: profile.includeNonLiftingDays)
+                        Toggle("Include Non-Lifting Days", isOn: profile.nonLiftingDaysEnabled)
                             .toggleStyle(SwitchToggleStyle(tint: Color(hex: "667eea")))
                             .foregroundColor(.white)
                         
-                        if profile.wrappedValue.includeNonLiftingDays {
+                        if profile.wrappedValue.nonLiftingDaysEnabled {
                             Text("Mode")
                                 .foregroundColor(.white)
                                 .fontWeight(.semibold)
                             Picker("Mode", selection: profile.nonLiftingDayMode) {
                                 Text("Pilates").tag("pilates")
                                 Text("Conditioning").tag("conditioning")
-                                Text("Mixed").tag("mixed")
+                                Text("GPP").tag("gpp")
+                                Text("Mobility").tag("mobility")
+                                Text("Rest").tag("rest")
                             }
-                            .pickerStyle(.segmented)
+                            .pickerStyle(.menu)
+                            .padding()
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
                             
                             Text("Conditioning Level")
                                 .foregroundColor(.white)
                                 .fontWeight(.semibold)
                             Picker("Level", selection: profile.conditioningLevel) {
-                                Text("Light").tag("light")
+                                Text("Low").tag("low")
                                 Text("Moderate").tag("moderate")
-                                Text("Intense").tag("intense")
-                            }
-                            .pickerStyle(.segmented)
-                        }
-                    }
-                }
-                
-                profileSection(title: "Physical Constraints") {
-                    VStack(spacing: 10) {
-                        ForEach(commonConstraints, id: \.self) { constraint in
-                            Button(action: { toggleConstraint(constraint) }) {
-                                HStack {
-                                    Text(constraint.replacingOccurrences(of: "_", with: " ").capitalized)
-                                        .foregroundColor(.white)
-                                    Spacer()
-                                    if profile.wrappedValue.constraints.contains(constraint) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(Color(hex: "667eea"))
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                                .padding()
-                                .background(profile.wrappedValue.constraints.contains(constraint) ? Color(hex: "667eea").opacity(0.2) : Color.white.opacity(0.05))
-                                .cornerRadius(12)
-                            }
-                        }
-                        
-                        HStack {
-                            TextField("Add custom constraint", text: $customConstraint)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            
-                            Button(action: addCustomConstraint) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(Color(hex: "667eea"))
-                                    .font(.title2)
-                            }
-                            .disabled(customConstraint.isEmpty)
-                        }
-                    }
-                }
-                
-                profileSection(title: "Movement Capabilities") {
-                    VStack(spacing: 15) {
-                        Toggle("Pull-ups", isOn: profile.movementCapabilities.pullups)
-                            .toggleStyle(SwitchToggleStyle(tint: Color(hex: "667eea")))
-                            .foregroundColor(.white)
-                        
-                        Toggle("Ring Dips", isOn: profile.movementCapabilities.ringDips)
-                            .toggleStyle(SwitchToggleStyle(tint: Color(hex: "667eea")))
-                            .foregroundColor(.white)
-                        
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Muscle-ups")
-                                .foregroundColor(.white)
-                                .fontWeight(.semibold)
-                            
-                            Picker("Muscle-ups", selection: profile.movementCapabilities.muscleUps) {
-                                Text("None").tag("none")
-                                Text("Bar").tag("bar")
-                                Text("Ring").tag("ring")
-                                Text("Both").tag("both")
+                                Text("High").tag("high")
                             }
                             .pickerStyle(.segmented)
                         }
@@ -324,22 +229,6 @@ struct ProfileView: View {
             Text(value)
                 .foregroundColor(.white)
                 .fontWeight(.semibold)
-        }
-    }
-    
-    func toggleConstraint(_ constraint: String) {
-        if editedProfile?.constraints.contains(constraint) == true {
-            editedProfile?.constraints.removeAll { $0 == constraint }
-        } else {
-            editedProfile?.constraints.append(constraint)
-        }
-    }
-    
-    func addCustomConstraint() {
-        let trimmed = customConstraint.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty && editedProfile?.constraints.contains(trimmed) == false {
-            editedProfile?.constraints.append(trimmed)
-            customConstraint = ""
         }
     }
     
