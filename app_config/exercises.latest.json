@@ -1,0 +1,861 @@
+{
+  "schemaVersion": 1,
+  "library": "styrkr",
+  "program": "531_krypteia_v1",
+  "version": 2,
+  "publishedAt": "2025-12-21T00:00:00Z",
+  "etag": "REPLACE_WITH_SHA256_OF_THIS_JSON",
+  "slotTaxonomy": {
+    "main": ["main_squat", "main_bench", "main_deadlift", "main_ohp"],
+    "supplemental": ["squat_variation", "bench_variation", "hinge_variation", "press_variation"],
+    "accessory": [
+      "upper_pull_vertical",
+      "upper_pull_horizontal",
+      "upper_push_horizontal",
+      "upper_push_vertical",
+      "single_leg_knee_dominant",
+      "single_leg_hip_dominant",
+      "posterior_chain",
+      "scap_stability",
+      "triceps",
+      "biceps",
+      "core_anti_extension",
+      "core_anti_rotation",
+      "core_flexion",
+      "carry"
+    ],
+    "conditioning": [
+      "conditioning_intervals_short",
+      "conditioning_intervals_medium",
+      "conditioning_steady_state",
+      "conditioning_jump_rope",
+      "conditioning_mixed_modal"
+    ],
+    "mobility": [
+      "mobility_hips_ir_er",
+      "mobility_hip_flexors",
+      "mobility_adductors",
+      "mobility_ankles",
+      "mobility_t_spine",
+      "mobility_shoulders",
+      "mobility_cars"
+    ]
+  },
+  "slotDefinitions": [
+    {
+      "slotTag": "upper_pull_vertical",
+      "label": "Vertical Pull",
+      "requiredPatterns": ["vertical_pull"]
+    },
+    {
+      "slotTag": "upper_pull_horizontal",
+      "label": "Horizontal Pull",
+      "requiredPatterns": ["horizontal_pull"]
+    },
+    {
+      "slotTag": "upper_push_horizontal",
+      "label": "Horizontal Push",
+      "requiredPatterns": ["horizontal_push"]
+    },
+    {
+      "slotTag": "upper_push_vertical",
+      "label": "Vertical Push",
+      "requiredPatterns": ["vertical_push"]
+    },
+    {
+      "slotTag": "single_leg_knee_dominant",
+      "label": "Single-Leg (Knee Dominant)",
+      "requiredPatterns": ["single_leg", "knee_dominant"]
+    },
+    {
+      "slotTag": "single_leg_hip_dominant",
+      "label": "Single-Leg (Hip Dominant)",
+      "requiredPatterns": ["single_leg", "hip_dominant"]
+    },
+    {
+      "slotTag": "posterior_chain",
+      "label": "Posterior Chain",
+      "requiredPatterns": ["hinge"]
+    },
+    {
+      "slotTag": "scap_stability",
+      "label": "Scap / Shoulder Stability",
+      "requiredPatterns": ["scap_stability"]
+    },
+    {
+      "slotTag": "triceps",
+      "label": "Triceps",
+      "requiredPatterns": ["triceps"]
+    },
+    {
+      "slotTag": "biceps",
+      "label": "Biceps",
+      "requiredPatterns": ["biceps"]
+    },
+    {
+      "slotTag": "core_anti_extension",
+      "label": "Core (Anti-Extension)",
+      "requiredPatterns": ["anti_extension"]
+    },
+    {
+      "slotTag": "core_anti_rotation",
+      "label": "Core (Anti-Rotation)",
+      "requiredPatterns": ["anti_rotation"]
+    },
+    {
+      "slotTag": "core_flexion",
+      "label": "Core (Flexion)",
+      "requiredPatterns": ["core_flexion"]
+    },
+    {
+      "slotTag": "carry",
+      "label": "Carry",
+      "requiredPatterns": ["carry"]
+    },
+    {
+      "slotTag": "conditioning_intervals_short",
+      "label": "Conditioning (Short Intervals)",
+      "requiredPatterns": ["conditioning", "intervals", "short"]
+    },
+    {
+      "slotTag": "conditioning_intervals_medium",
+      "label": "Conditioning (Medium Intervals)",
+      "requiredPatterns": ["conditioning", "intervals", "medium"]
+    },
+    {
+      "slotTag": "conditioning_steady_state",
+      "label": "Conditioning (Steady State)",
+      "requiredPatterns": ["conditioning", "steady_state"]
+    },
+    {
+      "slotTag": "conditioning_jump_rope",
+      "label": "Conditioning (Jump Rope)",
+      "requiredPatterns": ["conditioning", "jump_rope"]
+    },
+    {
+      "slotTag": "conditioning_mixed_modal",
+      "label": "Conditioning (Mixed Modal)",
+      "requiredPatterns": ["conditioning", "mixed_modal"]
+    },
+    {
+      "slotTag": "mobility_hips_ir_er",
+      "label": "Mobility (Hips IR/ER)",
+      "requiredPatterns": ["mobility", "hips_ir_er"]
+    },
+    {
+      "slotTag": "mobility_hip_flexors",
+      "label": "Mobility (Hip Flexors)",
+      "requiredPatterns": ["mobility", "hip_flexors"]
+    },
+    {
+      "slotTag": "mobility_adductors",
+      "label": "Mobility (Adductors)",
+      "requiredPatterns": ["mobility", "adductors"]
+    },
+    {
+      "slotTag": "mobility_ankles",
+      "label": "Mobility (Ankles)",
+      "requiredPatterns": ["mobility", "ankles"]
+    },
+    {
+      "slotTag": "mobility_t_spine",
+      "label": "Mobility (T-Spine)",
+      "requiredPatterns": ["mobility", "t_spine"]
+    },
+    {
+      "slotTag": "mobility_shoulders",
+      "label": "Mobility (Shoulders)",
+      "requiredPatterns": ["mobility", "shoulders"]
+    },
+    {
+      "slotTag": "mobility_cars",
+      "label": "Mobility (CARs)",
+      "requiredPatterns": ["mobility", "cars"]
+    }
+  ],
+  "exercises": [
+    {
+      "exerciseId": "back-squat",
+      "name": "Back Squat",
+      "category": "main",
+      "movementPatterns": ["squat", "knee_dominant"],
+      "slotTags": ["main_squat"],
+      "equipment": ["barbell", "squat_rack"],
+      "constraintsBlocked": ["no_barbell_back_squat", "no_deep_squat", "knee_issues", "low_back_sensitive"],
+      "fatigueScore": 5,
+      "notes": "Primary squat for BDSM."
+    },
+    {
+      "exerciseId": "flat-bench-press",
+      "name": "Flat Bench Press",
+      "category": "main",
+      "movementPatterns": ["horizontal_push"],
+      "slotTags": ["main_bench"],
+      "equipment": ["barbell", "bench"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 4,
+      "notes": "Primary bench for BDSM."
+    },
+    {
+      "exerciseId": "conventional-deadlift",
+      "name": "Conventional Deadlift",
+      "category": "main",
+      "movementPatterns": ["hinge", "hip_dominant"],
+      "slotTags": ["main_deadlift"],
+      "equipment": ["barbell"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 5,
+      "notes": "Primary deadlift for BDSM."
+    },
+    {
+      "exerciseId": "strict-overhead-press",
+      "name": "Strict Overhead Press",
+      "category": "main",
+      "movementPatterns": ["vertical_push"],
+      "slotTags": ["main_ohp"],
+      "equipment": ["barbell"],
+      "constraintsBlocked": ["no_overhead", "shoulder_issue", "elbow_issue"],
+      "fatigueScore": 4,
+      "notes": "Primary OHP for BDSM."
+    },
+
+    {
+      "exerciseId": "ssb-squat",
+      "name": "Safety Squat Bar Squat",
+      "category": "supplemental",
+      "movementPatterns": ["squat", "knee_dominant"],
+      "slotTags": ["squat_variation"],
+      "equipment": ["ssb", "squat_rack"],
+      "constraintsBlocked": ["no_ssb_squat", "knee_issues"],
+      "fatigueScore": 4,
+      "notes": "Joint-friendlier squat variation."
+    },
+    {
+      "exerciseId": "pause-squat",
+      "name": "Pause Squat",
+      "category": "supplemental",
+      "movementPatterns": ["squat", "knee_dominant"],
+      "slotTags": ["squat_variation"],
+      "equipment": ["barbell", "squat_rack"],
+      "constraintsBlocked": ["knee_issues", "low_back_sensitive"],
+      "fatigueScore": 4,
+      "notes": "Build positioning and tightness."
+    },
+    {
+      "exerciseId": "tempo-squat",
+      "name": "Tempo Squat",
+      "category": "supplemental",
+      "movementPatterns": ["squat", "knee_dominant"],
+      "slotTags": ["squat_variation"],
+      "equipment": ["barbell", "squat_rack"],
+      "constraintsBlocked": ["knee_issues", "low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Control + hypertrophy."
+    },
+    {
+      "exerciseId": "close-grip-bench",
+      "name": "Close Grip Bench Press",
+      "category": "supplemental",
+      "movementPatterns": ["horizontal_push", "triceps"],
+      "slotTags": ["bench_variation"],
+      "equipment": ["barbell", "bench"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 4,
+      "notes": "Triceps emphasis bench variation."
+    },
+    {
+      "exerciseId": "spoto-press",
+      "name": "Spoto Press",
+      "category": "supplemental",
+      "movementPatterns": ["horizontal_push"],
+      "slotTags": ["bench_variation"],
+      "equipment": ["barbell", "bench"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 3,
+      "notes": "Pause above chest."
+    },
+    {
+      "exerciseId": "larsen-press",
+      "name": "Larsen Press",
+      "category": "supplemental",
+      "movementPatterns": ["horizontal_push"],
+      "slotTags": ["bench_variation"],
+      "equipment": ["barbell", "bench"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 3,
+      "notes": "Legs off bench; upper-body tightness."
+    },
+    {
+      "exerciseId": "paused-deadlift",
+      "name": "Paused Deadlift",
+      "category": "supplemental",
+      "movementPatterns": ["hinge", "hip_dominant"],
+      "slotTags": ["hinge_variation"],
+      "equipment": ["barbell"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 4,
+      "notes": "Pause below knee."
+    },
+    {
+      "exerciseId": "barbell-rdl",
+      "name": "Barbell Romanian Deadlift",
+      "category": "supplemental",
+      "movementPatterns": ["hinge", "hip_dominant"],
+      "slotTags": ["hinge_variation", "posterior_chain"],
+      "equipment": ["barbell"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 4,
+      "notes": "Posterior chain builder."
+    },
+    {
+      "exerciseId": "ssb-rdl",
+      "name": "SSB Romanian Deadlift",
+      "category": "supplemental",
+      "movementPatterns": ["hinge", "hip_dominant"],
+      "slotTags": ["hinge_variation", "posterior_chain"],
+      "equipment": ["ssb"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 4,
+      "notes": "Hinge with SSB."
+    },
+    {
+      "exerciseId": "landmine-press",
+      "name": "Landmine Press",
+      "category": "supplemental",
+      "movementPatterns": ["vertical_push"],
+      "slotTags": ["press_variation", "upper_push_vertical"],
+      "equipment": ["landmine", "barbell"],
+      "constraintsBlocked": ["shoulder_issue", "no_overhead"],
+      "fatigueScore": 3,
+      "notes": "Shoulder-friendly press."
+    },
+
+    {
+      "exerciseId": "pull-up",
+      "name": "Pull-Up",
+      "category": "accessory",
+      "movementPatterns": ["vertical_pull"],
+      "slotTags": ["upper_pull_vertical"],
+      "equipment": ["pullup_bar", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 3,
+      "notes": "Default vertical pull."
+    },
+    {
+      "exerciseId": "weighted-pull-up",
+      "name": "Weighted Pull-Up",
+      "category": "accessory",
+      "movementPatterns": ["vertical_pull"],
+      "slotTags": ["upper_pull_vertical"],
+      "equipment": ["pullup_bar", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 4,
+      "notes": "Progression for strong pullers."
+    },
+    {
+      "exerciseId": "ring-row",
+      "name": "Ring Row",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_pull", "scap_stability"],
+      "slotTags": ["upper_pull_horizontal", "scap_stability"],
+      "equipment": ["rings", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 2,
+      "notes": "Joint-friendly row."
+    },
+    {
+      "exerciseId": "db-row",
+      "name": "Dumbbell Row",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_pull"],
+      "slotTags": ["upper_pull_horizontal"],
+      "equipment": ["db"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Heavy row option."
+    },
+    {
+      "exerciseId": "chest-supported-db-row",
+      "name": "Chest-Supported Dumbbell Row",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_pull"],
+      "slotTags": ["upper_pull_horizontal"],
+      "equipment": ["db", "bench"],
+      "constraintsBlocked": [],
+      "fatigueScore": 2,
+      "notes": "Keeps low back fresh."
+    },
+    {
+      "exerciseId": "landmine-row",
+      "name": "Landmine Row",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_pull"],
+      "slotTags": ["upper_pull_horizontal"],
+      "equipment": ["landmine", "barbell"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Great mid-back builder."
+    },
+    {
+      "exerciseId": "inverted-row-bar",
+      "name": "Inverted Row (Bar in Rack)",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_pull"],
+      "slotTags": ["upper_pull_horizontal"],
+      "equipment": ["barbell", "squat_rack", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 2,
+      "notes": "Simple rack-based row."
+    },
+
+    {
+      "exerciseId": "push-up",
+      "name": "Push-Up",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_push"],
+      "slotTags": ["upper_push_horizontal"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["wrist_issue", "shoulder_issue"],
+      "fatigueScore": 2,
+      "notes": "Fast density work."
+    },
+    {
+      "exerciseId": "ring-push-up",
+      "name": "Ring Push-Up",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_push", "scap_stability"],
+      "slotTags": ["upper_push_horizontal", "scap_stability"],
+      "equipment": ["rings", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 3,
+      "notes": "Adds stability demand."
+    },
+    {
+      "exerciseId": "db-incline-press",
+      "name": "Dumbbell Incline Press",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_push"],
+      "slotTags": ["upper_push_horizontal"],
+      "equipment": ["db", "bench"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 3,
+      "notes": "Good bench assistance."
+    },
+    {
+      "exerciseId": "db-floor-press",
+      "name": "Dumbbell Floor Press",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_push", "triceps"],
+      "slotTags": ["upper_push_horizontal", "triceps"],
+      "equipment": ["db"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 3,
+      "notes": "Limits shoulder ROM."
+    },
+
+    {
+      "exerciseId": "ring-dip",
+      "name": "Ring Dip",
+      "category": "accessory",
+      "movementPatterns": ["vertical_push", "triceps"],
+      "slotTags": ["upper_push_vertical", "triceps"],
+      "equipment": ["rings", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 4,
+      "notes": "Carryover if shoulders tolerate."
+    },
+    {
+      "exerciseId": "weighted-ring-dip",
+      "name": "Weighted Ring Dip",
+      "category": "accessory",
+      "movementPatterns": ["vertical_push", "triceps"],
+      "slotTags": ["upper_push_vertical", "triceps"],
+      "equipment": ["rings", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue", "elbow_issue"],
+      "fatigueScore": 5,
+      "notes": "Advanced progression."
+    },
+    {
+      "exerciseId": "half-kneeling-landmine-press",
+      "name": "Half-Kneeling Landmine Press",
+      "category": "accessory",
+      "movementPatterns": ["vertical_push", "anti_extension"],
+      "slotTags": ["upper_push_vertical", "core_anti_extension"],
+      "equipment": ["landmine", "barbell"],
+      "constraintsBlocked": ["shoulder_issue", "no_overhead"],
+      "fatigueScore": 2,
+      "notes": "Great when overhead is sensitive."
+    },
+
+    {
+      "exerciseId": "db-step-up",
+      "name": "Dumbbell Step-Up",
+      "category": "accessory",
+      "movementPatterns": ["single_leg", "knee_dominant"],
+      "slotTags": ["single_leg_knee_dominant"],
+      "equipment": ["db"],
+      "constraintsBlocked": ["no_knee_flexion", "knee_issues"],
+      "fatigueScore": 3,
+      "notes": "Primary single-leg knee dominant."
+    },
+    {
+      "exerciseId": "supported-split-squat",
+      "name": "Supported Split Squat",
+      "category": "accessory",
+      "movementPatterns": ["single_leg", "knee_dominant"],
+      "slotTags": ["single_leg_knee_dominant"],
+      "equipment": ["db", "bodyweight"],
+      "constraintsBlocked": ["no_lunges", "knee_issues"],
+      "fatigueScore": 3,
+      "notes": "Safer lunge alternative."
+    },
+    {
+      "exerciseId": "reverse-lunge",
+      "name": "Reverse Lunge",
+      "category": "accessory",
+      "movementPatterns": ["single_leg", "knee_dominant"],
+      "slotTags": ["single_leg_knee_dominant"],
+      "equipment": ["db", "kb", "bodyweight", "sandbag"],
+      "constraintsBlocked": ["no_lunges", "knee_issues"],
+      "fatigueScore": 3,
+      "notes": "Only if knees tolerate."
+    },
+    {
+      "exerciseId": "single-leg-kb-rdl",
+      "name": "Single-Leg Kettlebell RDL",
+      "category": "accessory",
+      "movementPatterns": ["single_leg", "hip_dominant", "hinge"],
+      "slotTags": ["single_leg_hip_dominant", "posterior_chain"],
+      "equipment": ["kb"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 2,
+      "notes": "Great for stability."
+    },
+
+    {
+      "exerciseId": "ghd-back-extension",
+      "name": "GHD Back Extension",
+      "category": "accessory",
+      "movementPatterns": ["hinge"],
+      "slotTags": ["posterior_chain"],
+      "equipment": ["ghd"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Posterior chain endurance."
+    },
+    {
+      "exerciseId": "kb-swing",
+      "name": "Kettlebell Swing",
+      "category": "accessory",
+      "movementPatterns": ["hinge"],
+      "slotTags": ["posterior_chain"],
+      "equipment": ["kb"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Explosive hinge."
+    },
+    {
+      "exerciseId": "sandbag-bearhug-carry",
+      "name": "Sandbag Bear Hug Carry",
+      "category": "accessory",
+      "movementPatterns": ["carry", "anti_extension"],
+      "slotTags": ["carry", "core_anti_extension"],
+      "equipment": ["sandbag"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Big trunk stimulus."
+    },
+
+    {
+      "exerciseId": "scap-pull-up",
+      "name": "Scap Pull-Up",
+      "category": "accessory",
+      "movementPatterns": ["scap_stability", "vertical_pull"],
+      "slotTags": ["scap_stability"],
+      "equipment": ["pullup_bar", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 1,
+      "notes": "Shoulder hygiene."
+    },
+    {
+      "exerciseId": "ring-ytw",
+      "name": "Ring Y-T-W",
+      "category": "accessory",
+      "movementPatterns": ["scap_stability"],
+      "slotTags": ["scap_stability"],
+      "equipment": ["rings", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 1,
+      "notes": "Scap control."
+    },
+
+    {
+      "exerciseId": "close-grip-push-up",
+      "name": "Close-Grip Push-Up",
+      "category": "accessory",
+      "movementPatterns": ["horizontal_push", "triceps"],
+      "slotTags": ["triceps", "upper_push_horizontal"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["wrist_issue", "elbow_issue"],
+      "fatigueScore": 2,
+      "notes": "Easy triceps volume."
+    },
+    {
+      "exerciseId": "db-curl",
+      "name": "Dumbbell Curl",
+      "category": "accessory",
+      "movementPatterns": ["biceps"],
+      "slotTags": ["biceps"],
+      "equipment": ["db"],
+      "constraintsBlocked": ["elbow_issue"],
+      "fatigueScore": 1,
+      "notes": "Optional elbow-friendly pump."
+    },
+
+    {
+      "exerciseId": "hollow-hold",
+      "name": "Hollow Hold",
+      "category": "accessory",
+      "movementPatterns": ["anti_extension"],
+      "slotTags": ["core_anti_extension"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 2,
+      "notes": "Gymnastics-friendly bracing."
+    },
+    {
+      "exerciseId": "dead-bug",
+      "name": "Dead Bug",
+      "category": "accessory",
+      "movementPatterns": ["anti_extension"],
+      "slotTags": ["core_anti_extension"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 1,
+      "notes": "Low fatigue trunk control."
+    },
+    {
+      "exerciseId": "side-plank",
+      "name": "Side Plank",
+      "category": "accessory",
+      "movementPatterns": ["anti_rotation"],
+      "slotTags": ["core_anti_rotation"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": [],
+      "fatigueScore": 1,
+      "notes": "Asymmetry-friendly."
+    },
+    {
+      "exerciseId": "hanging-knee-raise",
+      "name": "Hanging Knee Raise",
+      "category": "accessory",
+      "movementPatterns": ["core_flexion"],
+      "slotTags": ["core_flexion"],
+      "equipment": ["pullup_bar", "bodyweight"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 2,
+      "notes": "Trunk flexion + grip."
+    },
+
+    {
+      "exerciseId": "kb-suitcase-carry",
+      "name": "Kettlebell Suitcase Carry",
+      "category": "accessory",
+      "movementPatterns": ["carry", "anti_rotation"],
+      "slotTags": ["carry", "core_anti_rotation"],
+      "equipment": ["kb"],
+      "constraintsBlocked": [],
+      "fatigueScore": 2,
+      "notes": "Anti-rotation + grip."
+    },
+    {
+      "exerciseId": "db-farmer-carry",
+      "name": "Dumbbell Farmer Carry",
+      "category": "accessory",
+      "movementPatterns": ["carry"],
+      "slotTags": ["carry"],
+      "equipment": ["db"],
+      "constraintsBlocked": [],
+      "fatigueScore": 2,
+      "notes": "Simple carry."
+    },
+    {
+      "exerciseId": "kb-front-rack-carry",
+      "name": "Kettlebell Front Rack Carry",
+      "category": "accessory",
+      "movementPatterns": ["carry", "anti_extension"],
+      "slotTags": ["carry", "core_anti_extension"],
+      "equipment": ["kb"],
+      "constraintsBlocked": ["wrist_issue"],
+      "fatigueScore": 3,
+      "notes": "Hard bracing carry."
+    },
+
+    {
+      "exerciseId": "assault-bike-intervals-short",
+      "name": "Assault Bike Intervals (Short)",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "intervals", "short"],
+      "slotTags": ["conditioning_intervals_short"],
+      "equipment": ["assault_bike"],
+      "constraintsBlocked": [],
+      "fatigueScore": 3,
+      "notes": "Example: 10x :20 hard / :40 easy."
+    },
+    {
+      "exerciseId": "rower-intervals-short",
+      "name": "Rower Intervals (Short)",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "intervals", "short"],
+      "slotTags": ["conditioning_intervals_short"],
+      "equipment": ["rower"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Example: 8x :30 hard / :30 easy."
+    },
+    {
+      "exerciseId": "assault-bike-intervals-medium",
+      "name": "Assault Bike Intervals (Medium)",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "intervals", "medium"],
+      "slotTags": ["conditioning_intervals_medium"],
+      "equipment": ["assault_bike"],
+      "constraintsBlocked": [],
+      "fatigueScore": 4,
+      "notes": "Example: 6x 1:00 hard / 1:00 easy."
+    },
+    {
+      "exerciseId": "rower-intervals-medium",
+      "name": "Rower Intervals (Medium)",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "intervals", "medium"],
+      "slotTags": ["conditioning_intervals_medium"],
+      "equipment": ["rower"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 4,
+      "notes": "Example: 5x 500m hard / 2:00 easy."
+    },
+    {
+      "exerciseId": "assault-bike-steady-state",
+      "name": "Assault Bike Steady State",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "steady_state"],
+      "slotTags": ["conditioning_steady_state"],
+      "equipment": ["assault_bike"],
+      "constraintsBlocked": [],
+      "fatigueScore": 2,
+      "notes": "Zone 2 style work: 20–40 min."
+    },
+    {
+      "exerciseId": "rower-steady-state",
+      "name": "Rower Steady State",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "steady_state"],
+      "slotTags": ["conditioning_steady_state"],
+      "equipment": ["rower"],
+      "constraintsBlocked": ["low_back_sensitive"],
+      "fatigueScore": 2,
+      "notes": "Easy pace: 15–30 min."
+    },
+    {
+      "exerciseId": "jump-rope-intervals",
+      "name": "Jump Rope Intervals",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "jump_rope", "intervals", "short"],
+      "slotTags": ["conditioning_jump_rope"],
+      "equipment": ["jump_rope"],
+      "constraintsBlocked": ["ankle_issue", "knee_issues"],
+      "fatigueScore": 3,
+      "notes": "Example: 10x 1:00 on / :30 off."
+    },
+    {
+      "exerciseId": "mixed-modal-conditioning",
+      "name": "Mixed Modal Conditioning",
+      "category": "conditioning",
+      "movementPatterns": ["conditioning", "mixed_modal"],
+      "slotTags": ["conditioning_mixed_modal"],
+      "equipment": ["assault_bike", "rower", "jump_rope", "medball"],
+      "constraintsBlocked": ["knee_issues", "low_back_sensitive"],
+      "fatigueScore": 3,
+      "notes": "Rotate bike/row/jump rope/MB slams for 15–25 min."
+    },
+
+    {
+      "exerciseId": "hip-cars",
+      "name": "Hip CARs",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "cars"],
+      "slotTags": ["mobility_cars", "mobility_hips_ir_er"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": [],
+      "fatigueScore": 1,
+      "notes": "Controlled articular rotations for hips."
+    },
+    {
+      "exerciseId": "90-90-transitions",
+      "name": "90/90 Hip Transitions",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "hips_ir_er"],
+      "slotTags": ["mobility_hips_ir_er"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["hip_impingement"],
+      "fatigueScore": 1,
+      "notes": "Hip IR/ER control and range."
+    },
+    {
+      "exerciseId": "couch-stretch",
+      "name": "Couch Stretch",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "hip_flexors"],
+      "slotTags": ["mobility_hip_flexors"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["knee_issues"],
+      "fatigueScore": 1,
+      "notes": "Hip flexor / quad mobility."
+    },
+    {
+      "exerciseId": "adductor-rockbacks",
+      "name": "Adductor Rockbacks",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "adductors"],
+      "slotTags": ["mobility_adductors"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["hip_impingement"],
+      "fatigueScore": 1,
+      "notes": "Adductor mobility; great for squat depth comfort."
+    },
+    {
+      "exerciseId": "ankle-dorsiflexion-wall-drill",
+      "name": "Ankle Dorsiflexion Wall Drill",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "ankles"],
+      "slotTags": ["mobility_ankles"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": ["ankle_issue"],
+      "fatigueScore": 1,
+      "notes": "Squat mechanics support."
+    },
+    {
+      "exerciseId": "t-spine-rotation-open-book",
+      "name": "T-Spine Rotation (Open Books)",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "t_spine"],
+      "slotTags": ["mobility_t_spine"],
+      "equipment": ["bodyweight"],
+      "constraintsBlocked": [],
+      "fatigueScore": 1,
+      "notes": "Helps pressing and upper back positioning."
+    },
+    {
+      "exerciseId": "shoulder-dislocates-rings",
+      "name": "Shoulder Opener (Rings Assisted)",
+      "category": "mobility",
+      "movementPatterns": ["mobility", "shoulders"],
+      "slotTags": ["mobility_shoulders"],
+      "equipment": ["rings"],
+      "constraintsBlocked": ["shoulder_issue"],
+      "fatigueScore": 1,
+      "notes": "Gentle assisted shoulder mobility using rings."
+    }
+  ]
+}

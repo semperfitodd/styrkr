@@ -5,8 +5,8 @@ Production-ready Terraform configuration for the STYRKR strength training applic
 ## Architecture
 
 - **API Gateway**: HTTP API with JWT authorization via Cognito
-- **Lambda Functions**: Microservices for workout generation, logging, and profile management
-- **DynamoDB**: Two tables - user data (main) and app config (exercise library)
+- **Lambda Functions**: Microservices for profile and strength data management
+- **DynamoDB**: Single table for user data (profile, strength, workouts)
 - **Cognito**: User authentication with Apple and Google OAuth
 - **CloudFront + S3**: Static website hosting + public exercise library JSON
 - **Route53**: DNS management
@@ -57,11 +57,6 @@ terraform apply
 - `GET /strength` - Get strength data (1RMs, training maxes)
 - `PUT /strength` - Update strength data
 
-### Library Publisher Lambda
-- `POST /admin/library/publish` - Generate exercise library snapshot to S3 (JWT required)
-- Reads exercises from DynamoDB, creates versioned + latest JSON files
-- Publishes to S3 with CloudFront cache headers
-
 ## Security
 
 - All secrets stored in terraform.tfvars or AWS Secrets Manager
@@ -73,29 +68,13 @@ terraform apply
 
 ## Exercise Library
 
-120+ exercises for 5/3/1 Krypteia + longevity program stored in DynamoDB and auto-published to CloudFront.
-
-### Seed Exercises
-```bash
-cd scripts
-export CONFIG_TABLE_NAME=styrkr_app_config
-./seed_exercise_library.sh
-```
-
-Library automatically publishes to S3 within 30 seconds of any DynamoDB changes via DynamoDB Streams.
-
-### Manual Publish (Optional)
-```bash
-curl -X POST https://dev-api.yourdomain.com/admin/library/publish \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
+61 exercises for 5/3/1 Krypteia + longevity program stored as a static JSON file in S3.
 
 ### Access Library
-- Latest: `https://dev.yourdomain.com/config/exercises.latest.json`
-- Versioned: `https://dev.yourdomain.com/config/exercises.v{N}.json`
+The exercise library is publicly accessible via CloudFront:
+- URL: `https://dev.yourdomain.com/config/exercises.latest.json`
 
-**Auto-publish:** DynamoDB Stream triggers publish on INSERT/MODIFY/REMOVE with 30s debounce.  
-**Manual publish:** Available for immediate updates (bypasses debounce).
+The JSON file is stored in the S3 config bucket at `config/exercises.latest.json` and served through CloudFront with caching enabled.
 
 ## Outputs
 
@@ -103,8 +82,7 @@ After applying, Terraform outputs:
 - `api_url` - API Gateway custom domain
 - `frontend_url` - CloudFront website URL
 - `library_latest_url` - Exercise library CloudFront URL
-- `config_bucket_name` - S3 bucket for config snapshots
-- `config_table_name` - DynamoDB table for exercises
+- `config_bucket_name` - S3 bucket for config files (exercise library JSON)
 - `cognito_user_pool_id` - Cognito User Pool ID
 - `cognito_client_id` - Cognito Client ID
 - `cognito_domain` - Cognito custom domain

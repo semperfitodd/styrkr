@@ -1,7 +1,3 @@
-locals {
-  config_bucket_name = "${var.app_name}-config-${random_string.this.result}"
-}
-
 data "aws_iam_policy_document" "config_bucket" {
   statement {
     effect = "Allow"
@@ -17,6 +13,11 @@ data "aws_iam_policy_document" "config_bucket" {
     actions   = ["s3:GetObject"]
     resources = ["${module.config_s3_bucket.s3_bucket_arn}/*"]
   }
+}
+
+locals {
+  app_config_directory = "../app_config"
+  config_bucket_name   = "${var.app_name}-config-${random_string.this.result}"
 }
 
 module "config_s3_bucket" {
@@ -56,4 +57,14 @@ module "config_s3_bucket" {
   })
 }
 
+resource "aws_s3_object" "config_object" {
+  for_each = fileset(local.app_config_directory, "**/*")
 
+  bucket       = module.config_s3_bucket.s3_bucket_id
+  key          = "config/${each.value}"
+  source       = "${local.app_config_directory}/${each.value}"
+  etag         = filemd5("${local.app_config_directory}/${each.value}")
+  content_type = lookup(local.mime_types, split(".", each.value)[length(split(".", each.value)) - 1])
+
+  tags = var.tags
+}
