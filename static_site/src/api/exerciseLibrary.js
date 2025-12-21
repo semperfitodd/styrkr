@@ -1,11 +1,8 @@
-// Exercise Library API Client
-// Fetches from CloudFront (no auth required)
-
 const LIBRARY_URL = process.env.REACT_APP_LIBRARY_URL || 'https://dev.styrkr.com/config/exercises.latest.json';
 
 let cachedLibrary = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000;
 
 export class ExerciseLibraryError extends Error {
   constructor(message, code) {
@@ -15,14 +12,9 @@ export class ExerciseLibraryError extends Error {
   }
 }
 
-/**
- * Fetch the exercise library from CloudFront
- * Uses in-memory caching to avoid repeated fetches
- */
 export async function fetchExerciseLibrary(forceRefresh = false) {
   const now = Date.now();
   
-  // Return cached version if valid
   if (!forceRefresh && cachedLibrary && cacheTimestamp && (now - cacheTimestamp < CACHE_DURATION)) {
     return cachedLibrary;
   }
@@ -33,7 +25,6 @@ export async function fetchExerciseLibrary(forceRefresh = false) {
       headers: {
         'Accept': 'application/json',
       },
-      // Add cache-busting parameter if force refresh
       ...(forceRefresh ? { cache: 'reload' } : {}),
     });
 
@@ -46,7 +37,6 @@ export async function fetchExerciseLibrary(forceRefresh = false) {
 
     const library = await response.json();
     
-    // Validate library structure
     if (!library.exercises || !Array.isArray(library.exercises)) {
       throw new ExerciseLibraryError(
         'Invalid library structure: missing exercises array',
@@ -54,7 +44,6 @@ export async function fetchExerciseLibrary(forceRefresh = false) {
       );
     }
 
-    // Cache the result
     cachedLibrary = library;
     cacheTimestamp = now;
 
@@ -72,16 +61,10 @@ export async function fetchExerciseLibrary(forceRefresh = false) {
   }
 }
 
-/**
- * Filter exercises by category
- */
 export function filterByCategory(exercises, category) {
   return exercises.filter(ex => ex.category === category);
 }
 
-/**
- * Filter exercises by slot tags
- */
 export function filterBySlotTags(exercises, slotTags) {
   const tags = Array.isArray(slotTags) ? slotTags : [slotTags];
   return exercises.filter(ex => 
@@ -89,9 +72,6 @@ export function filterBySlotTags(exercises, slotTags) {
   );
 }
 
-/**
- * Filter exercises by equipment
- */
 export function filterByEquipment(exercises, equipment) {
   const equipmentList = Array.isArray(equipment) ? equipment : [equipment];
   return exercises.filter(ex =>
@@ -99,10 +79,6 @@ export function filterByEquipment(exercises, equipment) {
   );
 }
 
-/**
- * Filter exercises that are safe for user constraints
- * Returns exercises where NONE of the user's constraints are in constraintsBlocked
- */
 export function filterByConstraints(exercises, userConstraints) {
   if (!userConstraints || userConstraints.length === 0) {
     return exercises;
@@ -114,9 +90,6 @@ export function filterByConstraints(exercises, userConstraints) {
   });
 }
 
-/**
- * Search exercises by name or notes
- */
 export function searchExercises(exercises, query) {
   const lowerQuery = query.toLowerCase();
   return exercises.filter(ex =>
@@ -125,9 +98,6 @@ export function searchExercises(exercises, query) {
   );
 }
 
-/**
- * Group exercises by category
- */
 export function groupByCategory(exercises) {
   return exercises.reduce((acc, ex) => {
     if (!acc[ex.category]) {
@@ -138,46 +108,32 @@ export function groupByCategory(exercises) {
   }, {});
 }
 
-/**
- * Get exercises for a specific slot
- */
 export function getExercisesForSlot(library, slotTag, userConstraints = []) {
   let exercises = filterBySlotTags(library.exercises, slotTag);
   exercises = filterByConstraints(exercises, userConstraints);
   return exercises;
 }
 
-/**
- * Get all main lifts
- */
 export function getMainLifts(library) {
   return filterByCategory(library.exercises, 'main');
 }
 
-/**
- * Get all accessories
- */
 export function getAccessories(library) {
   return filterByCategory(library.exercises, 'accessory');
 }
 
-/**
- * Get all conditioning exercises
- */
+export function getSupplemental(library) {
+  return filterByCategory(library.exercises, 'supplemental');
+}
+
 export function getConditioning(library) {
   return filterByCategory(library.exercises, 'conditioning');
 }
 
-/**
- * Get all mobility exercises
- */
 export function getMobility(library) {
   return filterByCategory(library.exercises, 'mobility');
 }
 
-/**
- * Clear the cache (useful for testing or force refresh)
- */
 export function clearCache() {
   cachedLibrary = null;
   cacheTimestamp = null;

@@ -2,30 +2,31 @@ import Foundation
 
 // MARK: - Exercise Library
 struct ExerciseLibrary: Codable {
+    let schemaVersion: Int
     let library: String
     let program: String
     let version: Int
     let publishedAt: String
     let etag: String
-    let slots: SlotTaxonomy
+    let slotTaxonomy: SlotTaxonomy
+    let slotDefinitions: [SlotDefinition]
     let exercises: [Exercise]
 }
 
 // MARK: - Slot Taxonomy
 struct SlotTaxonomy: Codable {
-    let mainLifts: [String]
+    let main: [String]
     let supplemental: [String]
     let accessory: [String]
     let conditioning: [String]
     let mobility: [String]
-    
-    enum CodingKeys: String, CodingKey {
-        case mainLifts = "main_lifts"
-        case supplemental
-        case accessory
-        case conditioning
-        case mobility
-    }
+}
+
+// MARK: - Slot Definition
+struct SlotDefinition: Codable {
+    let slotTag: String
+    let label: String
+    let requiredPatterns: [String]
 }
 
 // MARK: - Exercise
@@ -39,8 +40,6 @@ struct Exercise: Codable, Identifiable {
     let constraintsBlocked: [String]
     let fatigueScore: Int
     let notes: String
-    let createdAt: String
-    let updatedAt: String
     
     var id: String { exerciseId }
 }

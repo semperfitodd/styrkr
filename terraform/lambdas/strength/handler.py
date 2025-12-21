@@ -5,10 +5,11 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from shared.auth import get_user_id, get_user_context
+from shared.auth import get_user_context
 from shared.dynamodb import data_table
 from shared.response import error_response, success_response
 from shared.validation import validate_strength, calculate_training_maxes
+from shared.utils import convert_floats_to_decimals
 
 def get_strength(user_id: str, user_email: str, request_id: str) -> dict:
     try:
@@ -22,6 +23,7 @@ def get_strength(user_id: str, user_email: str, request_id: str) -> dict:
         
         item.pop('userEmail', None)
         item.pop('dataType', None)
+        
         return success_response(200, item)
     
     except Exception as e:
@@ -42,14 +44,28 @@ def put_strength(user_id: str, user_email: str, body: dict, request_id: str) -> 
         
         training_maxes = calculate_training_maxes(body['oneRepMaxes'], body['tmPolicy'])
         
+        one_rep_maxes_decimal = convert_floats_to_decimals(body['oneRepMaxes'])
+        tm_policy_decimal = convert_floats_to_decimals(body['tmPolicy'])
+        training_maxes_decimal = convert_floats_to_decimals(training_maxes)
+        
+        history_entry = {
+            'date': now,
+            'oneRepMaxes': one_rep_maxes_decimal,
+            'trainingMaxes': training_maxes_decimal
+        }
+        
+        history = existing.get('history', [])
+        history.append(history_entry)
+        
         strength = {
             'userEmail': user_email,
             'dataType': 'STRENGTH',
             'userId': user_id,
             'email': user_email,
-            'oneRepMaxes': body['oneRepMaxes'],
-            'tmPolicy': body['tmPolicy'],
-            'trainingMaxes': training_maxes,
+            'oneRepMaxes': one_rep_maxes_decimal,
+            'tmPolicy': tm_policy_decimal,
+            'trainingMaxes': training_maxes_decimal,
+            'history': history,
             'createdAt': existing.get('createdAt', now),
             'updatedAt': now
         }
@@ -57,21 +73,21 @@ def put_strength(user_id: str, user_email: str, body: dict, request_id: str) -> 
         data_table.put_item(Item=strength)
         
         response_strength = {k: v for k, v in strength.items() if k not in ['userEmail', 'dataType']}
+        
         return success_response(200, response_strength)
     
     except Exception as e:
         print(f"Error putting strength: {e}")
+        import traceback
+        traceback.print_exc()
         return error_response(500, 'INTERNAL', 'Internal server error', request_id)
 
 def handler(event, context):
     try:
-        print(f"Event: {json.dumps(event)}")
         request_id = context.aws_request_id
         method = event['requestContext']['http']['method']
         
         user_context = get_user_context(event)
-        print(f"User context: {json.dumps(user_context)}")
-        
         if not user_context or not user_context.get('userId') or not user_context.get('email'):
             return error_response(403, 'FORBIDDEN', 'Invalid or missing authentication', request_id)
         
@@ -83,7 +99,6 @@ def handler(event, context):
         
         if method == 'PUT':
             body = json.loads(event.get('body', '{}'))
-            print(f"Body: {json.dumps(body)}")
             return put_strength(user_id, user_email, body, request_id)
         
         return error_response(405, 'METHOD_NOT_ALLOWED', 'Method not allowed', request_id)
@@ -92,5 +107,5 @@ def handler(event, context):
         print(f"Handler error: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
-        return error_response(500, 'INTERNAL', f'Internal server error: {str(e)}', context.aws_request_id)
+        return error_response(500, 'INTERNAL', 'Internal server error', context.aws_request_id)
 

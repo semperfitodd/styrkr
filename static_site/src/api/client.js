@@ -80,6 +80,32 @@ export const api = {
     });
   },
 
+  async getStrength() {
+    return apiRequest('/strength', { method: 'GET' });
+  },
+
+  async updateStrength(strength) {
+    return apiRequest('/strength', {
+      method: 'PUT',
+      body: JSON.stringify(strength),
+    });
+  },
+
+  async getWorkouts(startDate, endDate) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return apiRequest(`/workout${query}`, { method: 'GET' });
+  },
+
+  async logWorkout(workout) {
+    return apiRequest('/workout', {
+      method: 'POST',
+      body: JSON.stringify(workout),
+    });
+  },
+
 };
 
 export { ApiError };

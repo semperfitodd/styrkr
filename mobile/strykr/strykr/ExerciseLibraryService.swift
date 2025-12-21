@@ -11,20 +11,28 @@ class ExerciseLibraryService: ObservableObject {
     private let libraryURL = Secrets.exerciseLibraryURL
     private let cacheKey = "cached_exercise_library"
     private let cacheTimestampKey = "library_cache_timestamp"
-    private let cacheDuration: TimeInterval = 5 * 60 // 5 minutes
+    private let cacheDuration: TimeInterval = 5 * 60
     
     private init() {}
     
-    /// Fetch the exercise library from CloudFront
-    /// Uses cached version if available and not expired
+    private func log(_ message: String) {
+        #if DEBUG
+        print(message)
+        #endif
+    }
+    
     func fetchLibrary(forceRefresh: Bool = false) async {
+        log("🔄 Starting library fetch...")
+        log("   URL: \(libraryURL)")
+        log("   Force refresh: \(forceRefresh)")
+        
         await MainActor.run {
             isLoading = true
             error = nil
         }
         
-        // Check cache first
         if !forceRefresh, let cachedLibrary = loadFromCache() {
+            log("✅ Using cached library (\(cachedLibrary.exercises.count) exercises)")
             await MainActor.run {
                 self.library = cachedLibrary
                 self.isLoading = false
@@ -32,48 +40,99 @@ class ExerciseLibraryService: ObservableObject {
             return
         }
         
-        // Fetch from network
+        log("🌐 Fetching from network...")
+        
         do {
             guard let url = URL(string: libraryURL) else {
+                log("❌ Invalid URL: \(libraryURL)")
                 throw ExerciseLibraryError.invalidURL
             }
+            
+            log("✅ URL is valid, making request...")
             
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             
-            // Add cache-busting if force refresh
             if forceRefresh {
                 request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             }
             
             let (data, response) = try await URLSession.shared.data(for: request)
             
+            log("📥 Received response, data size: \(data.count) bytes")
+            
             guard let httpResponse = response as? HTTPURLResponse else {
+                log("❌ Invalid HTTP response")
                 throw ExerciseLibraryError.invalidResponse
             }
             
+            log("📊 HTTP Status: \(httpResponse.statusCode)")
+            
             guard httpResponse.statusCode == 200 else {
+                log("❌ HTTP Error: \(httpResponse.statusCode)")
+                log("   URL: \(libraryURL)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    log("   Response: \(responseString.prefix(200))")
+                }
                 throw ExerciseLibraryError.httpError(httpResponse.statusCode)
             }
             
             let decoder = JSONDecoder()
-            let library = try decoder.decode(ExerciseLibrary.self, from: data)
             
-            // Validate library structure
+            if let jsonString = String(data: data, encoding: .utf8) {
+                log("📦 Raw JSON (first 500 chars): \(String(jsonString.prefix(500)))")
+            }
+            
+            log("🔍 Attempting to decode JSON...")
+            
+            let library: ExerciseLibrary
+            do {
+                library = try decoder.decode(ExerciseLibrary.self, from: data)
+                log("✅ Successfully decoded library!")
+            } catch let decodingError as DecodingError {
+                log("❌ Decoding Error Details:")
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    log("  - Missing key: '\(key.stringValue)' at path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                case .typeMismatch(let type, let context):
+                    log("  - Type mismatch for type: \(type) at path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    log("  - Debug description: \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    log("  - Value not found for type: \(type) at path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                case .dataCorrupted(let context):
+                    log("  - Data corrupted at path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))")
+                    log("  - Debug description: \(context.debugDescription)")
+                @unknown default:
+                    log("  - Unknown decoding error: \(decodingError)")
+                }
+                throw ExerciseLibraryError.decodingError(decodingError.localizedDescription)
+            }
+            
+            log("📚 Library loaded:")
+            log("   - Schema version: \(library.schemaVersion)")
+            log("   - Program: \(library.program)")
+            log("   - Version: \(library.version)")
+            log("   - Exercises: \(library.exercises.count)")
+            log("   - Slot definitions: \(library.slotDefinitions.count)")
+            
             guard !library.exercises.isEmpty else {
+                log("❌ Library has no exercises!")
                 throw ExerciseLibraryError.emptyLibrary
             }
             
-            // Cache the result
             saveToCache(library)
+            log("💾 Library cached successfully")
             
             await MainActor.run {
                 self.library = library
                 self.isLoading = false
             }
             
+            log("✅ Library fetch complete!")
+            
         } catch {
+            log("❌ Final error: \(error)")
             await MainActor.run {
                 self.error = error.localizedDescription
                 self.isLoading = false
@@ -81,32 +140,35 @@ class ExerciseLibraryService: ObservableObject {
         }
     }
     
-    // MARK: - Cache Management
-    
     private func loadFromCache() -> ExerciseLibrary? {
-        // Check if cache is expired
+        log("🔍 Checking cache...")
+        
         if let timestamp = UserDefaults.standard.object(forKey: cacheTimestampKey) as? Date {
             let elapsed = Date().timeIntervalSince(timestamp)
+            log("   Cache age: \(Int(elapsed)) seconds (max: \(Int(cacheDuration)))")
             if elapsed > cacheDuration {
-                // Cache expired
+                log("   ⏰ Cache expired")
                 return nil
             }
         } else {
-            // No timestamp, cache is invalid
+            log("   ❌ No cache timestamp found")
             return nil
         }
         
-        // Load cached data
         guard let data = UserDefaults.standard.data(forKey: cacheKey) else {
+            log("   ❌ No cached data found")
             return nil
         }
+        
+        log("   📦 Found cached data (\(data.count) bytes)")
         
         do {
             let decoder = JSONDecoder()
             let library = try decoder.decode(ExerciseLibrary.self, from: data)
+            log("   ✅ Successfully decoded cached library")
             return library
         } catch {
-            print("❌ Failed to decode cached library: \(error)")
+            log("   ❌ Failed to decode cached library: \(error)")
             return nil
         }
     }
@@ -118,7 +180,7 @@ class ExerciseLibraryService: ObservableObject {
             UserDefaults.standard.set(data, forKey: cacheKey)
             UserDefaults.standard.set(Date(), forKey: cacheTimestampKey)
         } catch {
-            print("❌ Failed to cache library: \(error)")
+            log("❌ Failed to cache library: \(error)")
         }
     }
     
@@ -126,8 +188,6 @@ class ExerciseLibraryService: ObservableObject {
         UserDefaults.standard.removeObject(forKey: cacheKey)
         UserDefaults.standard.removeObject(forKey: cacheTimestampKey)
     }
-    
-    // MARK: - Helper Methods
     
     func getExercisesForSlot(_ slotTag: String, userConstraints: [String] = []) -> [Exercise] {
         guard let library = library else { return [] }
@@ -147,6 +207,11 @@ class ExerciseLibraryService: ObservableObject {
         return library.exercises.filterByCategory(.accessory)
     }
     
+    func getSupplemental() -> [Exercise] {
+        guard let library = library else { return [] }
+        return library.exercises.filterByCategory(.supplemental)
+    }
+    
     func getConditioning() -> [Exercise] {
         guard let library = library else { return [] }
         return library.exercises.filterByCategory(.conditioning)
@@ -158,7 +223,6 @@ class ExerciseLibraryService: ObservableObject {
     }
 }
 
-// MARK: - Errors
 enum ExerciseLibraryError: LocalizedError {
     case invalidURL
     case invalidResponse

@@ -53,15 +53,6 @@ module "api_gateway" {
   }
 
   routes = {
-    "GET /hello" = {
-      authorization_type = "JWT"
-      authorizer_key     = "cognito"
-      integration = {
-        method                 = "POST"
-        uri                    = module.lambda_hello.lambda_function_arn
-        payload_format_version = "2.0"
-      }
-    }
     "GET /profile" = {
       authorization_type = "JWT"
       authorizer_key     = "cognito"
@@ -98,12 +89,21 @@ module "api_gateway" {
         payload_format_version = "2.0"
       }
     }
-    "POST /admin/library/publish" = {
+    "GET /workout" = {
       authorization_type = "JWT"
       authorizer_key     = "cognito"
       integration = {
         method                 = "POST"
-        uri                    = module.lambda_library_publisher.lambda_function_arn
+        uri                    = module.lambda_workout.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "POST /workout" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_workout.lambda_function_arn
         payload_format_version = "2.0"
       }
     }

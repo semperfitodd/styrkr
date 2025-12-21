@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import ProfileView from './components/ProfileView';
 import ExerciseLibrary from './components/ExerciseLibrary';
+import ProgramView from './components/ProgramView';
 import { api } from './api/client';
 import './HomeScreen.css';
 
@@ -9,6 +10,7 @@ function HomeScreen() {
   const { user, logout } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
   const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
+  const [showProgram, setShowProgram] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
@@ -44,6 +46,11 @@ function HomeScreen() {
         </div>
 
         <div className="features">
+          <div className="feature clickable" onClick={() => setShowProgram(true)}>
+            <h3>📅 Training Program</h3>
+            <p>View your personalized 13-week 5/3/1 Krypteia program</p>
+            <span className="feature-link">View Program →</span>
+          </div>
           <div className="feature clickable" onClick={() => setShowExerciseLibrary(true)}>
             <h3>📚 Exercise Library</h3>
             <p>Browse 120+ exercises for 5/3/1 Krypteia + longevity</p>
@@ -52,10 +59,6 @@ function HomeScreen() {
           <div className="feature">
             <h3>💪 Track Your Progress</h3>
             <p>Log workouts and monitor your strength gains over time</p>
-          </div>
-          <div className="feature">
-            <h3>🎯 Set Goals</h3>
-            <p>Define and achieve your fitness objectives</p>
           </div>
         </div>
 
@@ -78,6 +81,7 @@ function HomeScreen() {
           userProfile={userProfile}
         />
       )}
+      {showProgram && <ProgramView onClose={() => setShowProgram(false)} />}
     </div>
   );
 }
