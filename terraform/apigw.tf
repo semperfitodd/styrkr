@@ -107,6 +107,24 @@ module "api_gateway" {
         payload_format_version = "2.0"
       }
     }
+    "GET /schedule" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_schedule.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "PUT /schedule" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_schedule.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
   }
 
   tags = var.tags

@@ -4,6 +4,8 @@ resource "aws_dynamodb_table" "main" {
   hash_key     = "userEmail"
   range_key    = "dataType"
 
+  deletion_protection_enabled = true
+
   attribute {
     name = "userEmail"
     type = "S"
@@ -28,6 +30,8 @@ resource "aws_dynamodb_table" "workout_history" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "userEmail"
   range_key    = "workoutDate"
+
+  deletion_protection_enabled = true
 
   attribute {
     name = "userEmail"

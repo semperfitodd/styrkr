@@ -15,7 +15,7 @@ Styrkr generates a complete, long-term strength program based on your lifts. You
 
 ### Freedom without breaking the program
 
-Travel or miss a day? You can move workouts within the week without ruining progression or recovery. The plan adapts to real life instead of forcing you into a rigid calendar.
+Drag and drop workouts to swap days within the same week. Changes persist across devices and sessions.
 
 ### Smart exercise substitutions
 

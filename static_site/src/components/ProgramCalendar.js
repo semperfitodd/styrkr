@@ -1,9 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../api/client';
 import './ProgramCalendar.css';
 
 function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, onSelectDay }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
+  const [draggedDay, setDraggedDay] = useState(null);
+  const [dragOverDay, setDragOverDay] = useState(null);
+  const [daySwaps, setDaySwaps] = useState({});
+  const [isLoadingSwaps, setIsLoadingSwaps] = useState(true);
+
+  useEffect(() => {
+    loadScheduleCustomizations();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadScheduleCustomizations = async () => {
+    try {
+      setIsLoadingSwaps(true);
+      const result = await api.getScheduleCustomizations();
+      if (result.daySwaps) {
+        setDaySwaps(result.daySwaps);
+      }
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        console.error('Error loading schedule customizations:', err);
+      }
+    } finally {
+      setIsLoadingSwaps(false);
+    }
+  };
+
+  const saveScheduleCustomizations = async (swaps) => {
+    try {
+      await api.updateScheduleCustomizations({ daySwaps: swaps });
+    } catch (err) {
+      console.error('Error saving schedule customizations:', err);
+      alert('Failed to save schedule changes. Please try again.');
+    }
+  };
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -34,19 +69,25 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
     return null;
   };
 
-  const getSessionForDay = (date, weekInfo) => {
+  const getOriginalSessionForDay = (date, weekInfo) => {
     if (!weekInfo || !weekInfo.sessions) return null;
+    
     const dayOfWeek = date.getDay();
-    // Map day of week to session index (0-3 for 4 sessions)
-    // Assuming Mon/Tue/Thu/Fri pattern
-    const sessionMap = {
-      1: 0, // Monday - Squat
-      2: 1, // Tuesday - Bench
-      4: 2, // Thursday - Deadlift
-      5: 3, // Friday - OHP
-    };
+    const sessionMap = { 1: 0, 2: 1, 4: 2, 5: 3 };
     const sessionIndex = sessionMap[dayOfWeek];
     return sessionIndex !== undefined ? weekInfo.sessions[sessionIndex] : null;
+  };
+
+  const getSessionForDay = (date, weekInfo) => {
+    if (!weekInfo || !weekInfo.sessions) return null;
+    
+    const dateStr = date.toISOString().split('T')[0];
+    
+    if (daySwaps[dateStr]) {
+      return daySwaps[dateStr];
+    }
+    
+    return getOriginalSessionForDay(date, weekInfo);
   };
 
   const isWorkoutCompleted = (date) => {
@@ -69,28 +110,115 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
     setCurrentMonth(newDate);
   };
 
+  const handleDragStart = (e, date, weekInfo, session) => {
+    if (!session || isWorkoutCompleted(date)) return;
+    
+    setDraggedDay({ date, weekInfo, session });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.currentTarget);
+    
+    setTimeout(() => {
+      e.currentTarget.style.opacity = '0.4';
+    }, 0);
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+    setDraggedDay(null);
+    setDragOverDay(null);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  };
+
+  const handleDragEnter = (e, date, weekInfo, session) => {
+    if (!draggedDay || !session || isWorkoutCompleted(date)) return;
+    
+    if (draggedDay.weekInfo.weekNumber === weekInfo.weekNumber) {
+      setDragOverDay(date);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    if (e.currentTarget === e.target) {
+      setDragOverDay(null);
+    }
+  };
+
+  const handleDrop = (e, targetDate, targetWeekInfo, targetSession) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!draggedDay || !targetSession || isWorkoutCompleted(targetDate)) {
+      setDraggedDay(null);
+      setDragOverDay(null);
+      return;
+    }
+    
+    if (draggedDay.weekInfo.weekNumber !== targetWeekInfo.weekNumber) {
+      setDraggedDay(null);
+      setDragOverDay(null);
+      return;
+    }
+    
+    const draggedDateStr = draggedDay.date.toISOString().split('T')[0];
+    const targetDateStr = targetDate.toISOString().split('T')[0];
+    
+    if (draggedDateStr === targetDateStr) {
+      setDraggedDay(null);
+      setDragOverDay(null);
+      return;
+    }
+    
+    const draggedOriginalSession = getOriginalSessionForDay(draggedDay.date, draggedDay.weekInfo);
+    const targetOriginalSession = getOriginalSessionForDay(targetDate, targetWeekInfo);
+    
+    const newSwaps = { ...daySwaps };
+    newSwaps[draggedDateStr] = targetOriginalSession;
+    newSwaps[targetDateStr] = draggedOriginalSession;
+    setDaySwaps(newSwaps);
+    
+    setDraggedDay(null);
+    setDragOverDay(null);
+    
+    saveScheduleCustomizations(newSwaps);
+  };
+
   const renderCalendar = () => {
     const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
     const days = [];
 
-    // Empty cells for days before month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
     }
 
-    // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const weekInfo = getWeekForDate(date);
       const session = weekInfo ? getSessionForDay(date, weekInfo) : null;
       const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
       const isCompleted = isWorkoutCompleted(date);
+      const isDragging = draggedDay && draggedDay.date.toDateString() === date.toDateString();
+      const isDragOver = dragOverDay && dragOverDay.toDateString() === date.toDateString();
+      const canDrop = session && !isCompleted && draggedDay && 
+                      draggedDay.weekInfo.weekNumber === weekInfo?.weekNumber &&
+                      draggedDay.date.toDateString() !== date.toDateString();
       
       days.push(
         <div
           key={day}
-          className={`calendar-day ${weekInfo ? 'has-workout' : ''} ${session ? 'has-session' : ''} ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''} ${weekInfo ? `phase-${weekInfo.phase.toLowerCase()}` : ''}`}
+          className={`calendar-day ${weekInfo ? 'has-workout' : ''} ${session ? 'has-session' : ''} ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''} ${weekInfo ? `phase-${weekInfo.phase.toLowerCase()}` : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''} ${canDrop ? 'can-drop' : ''}`}
           onClick={() => handleDayClick(date, weekInfo)}
+          draggable={session && !isCompleted}
+          onDragStart={(e) => handleDragStart(e, date, weekInfo, session)}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDragOver}
+          onDragEnter={(e) => handleDragEnter(e, date, weekInfo, session)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, date, weekInfo, session)}
         >
           <div className="day-number">
             {day}
@@ -102,6 +230,9 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
               {session && <div className="session-label">{session.label}</div>}
             </div>
           )}
+          {session && !isCompleted && (
+            <div className="drag-handle" title="Drag to swap days">⋮⋮</div>
+          )}
         </div>
       );
     }
@@ -109,7 +240,17 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
     return days;
   };
 
+  const handleResetSchedule = async () => {
+    if (!window.confirm('Reset all workout day swaps? This will restore the original schedule.')) {
+      return;
+    }
+    
+    setDaySwaps({});
+    await saveScheduleCustomizations({});
+  };
+
   const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const hasSwaps = Object.keys(daySwaps).length > 0;
 
   return (
     <div className="program-calendar">
@@ -118,6 +259,19 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
         <h3>{monthName}</h3>
         <button onClick={() => changeMonth(1)} className="month-nav">→</button>
       </div>
+      
+      {isLoadingSwaps && (
+        <div className="calendar-loading">Loading schedule...</div>
+      )}
+      
+      {hasSwaps && !isLoadingSwaps && (
+        <div className="schedule-customization-notice">
+          <span>📅 You have customized workout days</span>
+          <button onClick={handleResetSchedule} className="btn-reset-schedule">
+            Reset Schedule
+          </button>
+        </div>
+      )}
       
       <div className="calendar-weekdays">
         <div>Sun</div>

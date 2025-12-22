@@ -106,6 +106,17 @@ export const api = {
     });
   },
 
+  async getScheduleCustomizations() {
+    return apiRequest('/schedule', { method: 'GET' });
+  },
+
+  async updateScheduleCustomizations(customizations) {
+    return apiRequest('/schedule', {
+      method: 'PUT',
+      body: JSON.stringify(customizations),
+    });
+  },
+
 };
 
 export { ApiError };
