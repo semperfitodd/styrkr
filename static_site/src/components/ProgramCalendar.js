@@ -129,25 +129,12 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
     if (!assignment) return null;
     
     if (assignment.type === DAY_TYPES.MAIN) {
-      // ALWAYS return the true original from the week template, ignoring any swaps
       return weekInfo.sessions[assignment.index];
     }
     
     return generatedWorkouts[assignment.type] || null;
   };
   
-  const getTrueOriginalSessionForDay = (date, weekInfo) => {
-    // Get the actual original session from the week template, ignoring all swaps
-    if (!weekInfo || !weekInfo.sessions) return null;
-    
-    const dayOfWeek = date.getDay();
-    const assignment = dayAssignments[dayOfWeek];
-    
-    if (!assignment || assignment.type !== DAY_TYPES.MAIN) return null;
-    
-    return weekInfo.sessions[assignment.index];
-  };
-
   const getSessionForDay = (date, weekInfo) => {
     if (!weekInfo) return null;
     
@@ -248,7 +235,6 @@ function ProgramCalendar({ program, weekDates, completedWorkouts, onSelectWeek, 
       return;
     }
     
-    // Just swap whatever is currently displayed - don't care about "original"
     const draggedCurrentSession = draggedDay.session;
     const targetCurrentSession = targetSession;
     

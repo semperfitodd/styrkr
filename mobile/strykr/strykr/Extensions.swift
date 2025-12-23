@@ -16,12 +16,18 @@ extension Color {
         default:
             (a, r, g, b) = (255, 0, 0, 0)
         }
+        
+        let red = min(max(Double(r) / 255.0, 0.0), 1.0)
+        let green = min(max(Double(g) / 255.0, 0.0), 1.0)
+        let blue = min(max(Double(b) / 255.0, 0.0), 1.0)
+        let alpha = min(max(Double(a) / 255.0, 0.0), 1.0)
+        
         self.init(
             .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
+            red: red,
+            green: green,
+            blue: blue,
+            opacity: alpha
         )
     }
 }

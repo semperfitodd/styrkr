@@ -15,7 +15,7 @@ Styrkr generates a complete, long-term strength program based on your lifts. You
 
 ### Freedom without breaking the program
 
-Drag and drop workouts to swap days within the same week. Changes persist across devices and sessions.
+Drag and drop workouts to swap days within the same week on both web and iOS. Changes persist across devices and sessions. Reset schedule anytime to restore original order.
 
 ### Smart exercise substitutions
 
@@ -207,6 +207,7 @@ Open `mobile/strykr/strykr.xcodeproj` in Xcode and run.
 - `GET/POST /program/settings` - User program settings
 - `GET /program/week?weekIndex=N` - Server-rendered week with computed weights & selected exercises
 - `GET /nonlift/day?type=X&weekIndex=N` - Generate GPP/Mobility/Active Recovery workouts
+- `GET/PUT /schedule` - Day swap customizations
 - `GET/PUT /profile` - User profile
 - `GET/PUT /strength` - 1RM data
 - `GET/POST /workout` - Workout logs

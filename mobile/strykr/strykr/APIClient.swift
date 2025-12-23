@@ -156,19 +156,11 @@ class APIClient {
             throw APIError.invalidResponse
         }
         
-        switch httpResponse.statusCode {
-        case 200...299:
-            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                return json
-            }
-            return [:]
-        case 404:
-            return [:]
-        case 401:
-            throw APIError.unauthorized
-        default:
-            throw APIError.serverError("Status code: \(httpResponse.statusCode)")
+        guard (200...299).contains(httpResponse.statusCode) || httpResponse.statusCode == 404 else {
+            throw httpResponse.statusCode == 401 ? APIError.unauthorized : APIError.serverError("Status code: \(httpResponse.statusCode)")
         }
+        
+        return (try? JSONSerialization.jsonObject(with: data) as? [String: Any]) ?? [:]
     }
     
     func updateScheduleCustomizations(_ customizations: [String: Any]) async throws {
@@ -184,7 +176,6 @@ class APIClient {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
         request.httpBody = try JSONSerialization.data(withJSONObject: customizations)
         
         let (_, response) = try await URLSession.shared.data(for: request)
@@ -193,13 +184,8 @@ class APIClient {
             throw APIError.invalidResponse
         }
         
-        switch httpResponse.statusCode {
-        case 200...299:
-            return
-        case 401:
-            throw APIError.unauthorized
-        default:
-            throw APIError.serverError("Status code: \(httpResponse.statusCode)")
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw httpResponse.statusCode == 401 ? APIError.unauthorized : APIError.serverError("Status code: \(httpResponse.statusCode)")
         }
     }
 }

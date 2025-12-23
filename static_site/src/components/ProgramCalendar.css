@@ -178,23 +178,6 @@
   opacity: 0.7;
 }
 
-.calendar-day.completed::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
-  background: #10b981;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .completed-badge {
   position: absolute;
   top: 2px;
@@ -211,28 +194,33 @@
   font-weight: 700;
 }
 
-.calendar-day.phase-leader {
+.calendar-day.phase-leader,
+.legend-color.phase-leader {
   border-color: #10b981;
   background: #f0fdf4;
 }
 
-.calendar-day.phase-anchor {
+.calendar-day.phase-anchor,
+.legend-color.phase-anchor {
   border-color: #f59e0b;
   background: #fffbeb;
 }
 
 .calendar-day.phase-deload_1,
-.calendar-day.phase-deload_2 {
+.calendar-day.phase-deload_2,
+.legend-color.phase-deload_1 {
   border-color: #6366f1;
   background: #eef2ff;
 }
 
-.calendar-day.phase-test {
+.calendar-day.phase-test,
+.legend-color.phase-test {
   border-color: #ef4444;
   background: #fef2f2;
 }
 
-.calendar-day.phase-reset {
+.calendar-day.phase-reset,
+.legend-color.phase-reset {
   border-color: #8b5cf6;
   background: #faf5ff;
 }
@@ -296,31 +284,6 @@
   height: 20px;
   border-radius: 4px;
   border: 3px solid;
-}
-
-.legend-color.phase-leader {
-  border-color: #10b981;
-  background: #f0fdf4;
-}
-
-.legend-color.phase-anchor {
-  border-color: #f59e0b;
-  background: #fffbeb;
-}
-
-.legend-color.phase-deload_1 {
-  border-color: #6366f1;
-  background: #eef2ff;
-}
-
-.legend-color.phase-test {
-  border-color: #ef4444;
-  background: #fef2f2;
-}
-
-.legend-color.phase-reset {
-  border-color: #8b5cf6;
-  background: #faf5ff;
 }
 
 .legend-item span {

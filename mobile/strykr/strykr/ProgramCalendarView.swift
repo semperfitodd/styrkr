@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ProgramCalendarView: View {
     let program: GeneratedProgram
@@ -61,7 +62,7 @@ struct ProgramCalendarView: View {
             
             // Calendar grid
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 4) {
-                ForEach(daysInMonth, id: \.self) { date in
+                ForEach(Array(daysInMonth.enumerated()), id: \.offset) { index, date in
                     if let date = date {
                         DayCell(
                             date: date,
