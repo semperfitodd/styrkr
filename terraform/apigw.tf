@@ -125,6 +125,60 @@ module "api_gateway" {
         payload_format_version = "2.0"
       }
     }
+    # Public config endpoints (no auth)
+    "GET /program/template" = {
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_config.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "GET /exercises" = {
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_config.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    # Program settings (with auth)
+    "GET /program/settings" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_program_settings.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    "POST /program/settings" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_program_settings.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    # Program week renderer (with auth)
+    "GET /program/week" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_program_week.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
+    # Non-lifting day generator (with auth)
+    "GET /nonlift/day" = {
+      authorization_type = "JWT"
+      authorizer_key     = "cognito"
+      integration = {
+        method                 = "POST"
+        uri                    = module.lambda_nonlift.lambda_function_arn
+        payload_format_version = "2.0"
+      }
+    }
   }
 
   tags = var.tags

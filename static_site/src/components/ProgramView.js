@@ -16,6 +16,7 @@ function ProgramView({ onClose }) {
   const [needsStrengthData, setNeedsStrengthData] = useState(false);
   const [weekDates, setWeekDates] = useState([]);
   const [completedWorkouts, setCompletedWorkouts] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
   
   // For entering 1RMs
   const [oneRepMaxes, setOneRepMaxes] = useState({
@@ -87,6 +88,7 @@ function ProgramView({ onClose }) {
     try {
       // Load profile for units preference
       const profile = await api.getProfile();
+      setUserProfile(profile);
       setUnits(profile.preferredUnits || 'lb');
       
       // Calculate program start date
@@ -233,6 +235,42 @@ function ProgramView({ onClose }) {
     setCircuitData(updated);
   };
 
+  const handleGPPExerciseSelect = (slotIdx, slot, exerciseId) => {
+    if (!selectedSession?.circuit) return;
+    
+    const exercise = slot.exercises.find(ex => ex.id === exerciseId);
+    const rounds = selectedSession.circuit.rounds;
+    
+    const newData = [];
+    for (let r = 1; r <= rounds; r++) {
+      const existing = circuitData.find(d => d.round === r && d.slotIdx === slotIdx);
+      newData.push({
+        round: r,
+        slotIdx,
+        exerciseId,
+        exerciseName: exercise?.name || '',
+        weight: existing?.weight || '',
+        reps: existing?.reps || '',
+        targetReps: slot.targetReps,
+      });
+    }
+    
+    const otherSlots = circuitData.filter(d => d.slotIdx !== slotIdx);
+    setCircuitData([...otherSlots, ...newData].sort((a, b) => {
+      if (a.round !== b.round) return a.round - b.round;
+      return a.slotIdx - b.slotIdx;
+    }));
+  };
+
+  const updateGPPSet = (round, slotIdx, field, value) => {
+    const updated = [...circuitData];
+    const idx = updated.findIndex(d => d.round === round && d.slotIdx === slotIdx);
+    if (idx >= 0) {
+      updated[idx][field] = value;
+      setCircuitData(updated);
+    }
+  };
+
   const handleCompleteWorkout = async () => {
     if (!selectedDay || !selectedSession) return;
     
@@ -241,32 +279,63 @@ function ProgramView({ onClose }) {
         workoutDate: selectedDay.toISOString().split('T')[0],
         programWeek: selectedWeek,
         sessionId: selectedSession.sessionId,
-        mainLift: {
+      };
+
+      if (selectedSession.mainSets) {
+        workoutLog.mainLift = {
           liftId: selectedSession.mainLiftId,
-          sets: selectedSession.mainSets?.map(set => ({
+          sets: selectedSession.mainSets.map(set => ({
             weight: set.weight,
             reps: set.targetReps,
             targetReps: set.targetReps,
             pctTM: set.pctTM,
-          })) || [],
-        },
-        circuit: circuitData.length > 0 ? {
+          })),
+        };
+
+        if (circuitData.length > 0) {
+          workoutLog.circuit = {
+            rounds: selectedSession.circuit.rounds,
+            sets: circuitData.map(set => ({
+              round: set.round,
+              exercise: set.exercise,
+              exerciseName: set.exerciseName,
+              weight: parseFloat(set.weight) || 0,
+              reps: parseInt(set.reps) || 0,
+              targetReps: set.targetReps,
+            }))
+          };
+        }
+      } else if (selectedSession.isInteractive && selectedSession.circuit) {
+        workoutLog.gppCircuit = {
+          type: selectedSession.label,
           rounds: selectedSession.circuit.rounds,
+          conditioning: selectedSession.conditioning,
           sets: circuitData.map(set => ({
             round: set.round,
-            exercise: set.exercise,
+            slotIdx: set.slotIdx,
+            exerciseId: set.exerciseId,
             exerciseName: set.exerciseName,
             weight: parseFloat(set.weight) || 0,
             reps: parseInt(set.reps) || 0,
             targetReps: set.targetReps,
-          }))
-        } : undefined,
-      };
+          })),
+        };
+      } else if (selectedSession.exercises) {
+        workoutLog.nonLiftingDay = {
+          type: selectedSession.label,
+          exercises: selectedSession.exercises.map(ex => ({
+            name: ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            duration: ex.duration,
+            notes: ex.notes,
+          })),
+        };
+      }
       
       await api.logWorkout(workoutLog);
       alert('Workout logged successfully!');
       
-      // Reload completed workouts to update calendar
       await loadCompletedWorkouts();
       
       setSelectedDay(null);
@@ -457,6 +526,7 @@ function ProgramView({ onClose }) {
           completedWorkouts={completedWorkouts}
           onSelectWeek={setSelectedWeek}
           onSelectDay={handleSelectDay}
+          userProfile={userProfile}
         />
 
         {selectedDay && selectedSession && (
@@ -469,6 +539,132 @@ function ProgramView({ onClose }) {
                 <h2>{selectedDay.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h2>
                 <h3>{selectedSession.label}</h3>
               </div>
+
+            {selectedSession.isInteractive && selectedSession.circuit && (
+              <>
+                <div className="interactive-gpp-workout">
+                  {selectedSession.conditioning && (
+                    <div className="conditioning-block">
+                      <h4>Conditioning - {selectedSession.conditioning.modality}</h4>
+                      <p>{selectedSession.conditioning.description}</p>
+                      <p className="target-rpe">Target RPE: {selectedSession.conditioning.targetRPE}</p>
+                    </div>
+                  )}
+
+                  {selectedSession.notes && selectedSession.notes.length > 0 && (
+                    <div className="workout-notes">
+                      {selectedSession.notes.map((note, idx) => (
+                        <p key={idx}>{note}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="gpp-circuit-section">
+                    <h4>Circuit - {selectedSession.circuit.rounds} Rounds</h4>
+                    
+                    <div className="exercise-selectors">
+                      {selectedSession.circuit.slots.map((slot, slotIdx) => (
+                        <div key={slotIdx} className="slot-selector">
+                          <label>{slot.label}</label>
+                          <select
+                            value={circuitData[slotIdx]?.exerciseId || ''}
+                            onChange={(e) => handleGPPExerciseSelect(slotIdx, slot, e.target.value)}
+                          >
+                            <option value="">Select {slot.label}...</option>
+                            {slot.exercises.map(ex => (
+                              <option key={ex.id} value={ex.id}>{ex.name}</option>
+                            ))}
+                          </select>
+                          <span className="target-reps">Target: {slot.targetReps}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {circuitData.length > 0 && circuitData[0]?.exerciseId && (
+                      <div className="rounds-logging">
+                        {Array.from({ length: selectedSession.circuit.rounds }).map((_, roundIdx) => (
+                          <div key={roundIdx} className="round-log">
+                            <h5>Round {roundIdx + 1}</h5>
+                            <div className="round-sets">
+                              {selectedSession.circuit.slots.map((slot, slotIdx) => {
+                                const exercise = slot.exercises.find(ex => ex.id === circuitData[slotIdx]?.exerciseId);
+                                const setData = circuitData.find(d => d.round === roundIdx + 1 && d.slotIdx === slotIdx) || {};
+                                
+                                return (
+                                  <div key={slotIdx} className="set-log-row">
+                                    <span className="exercise-name-small">{exercise?.name || slot.label}</span>
+                                    <div className="set-inputs">
+                                      <div className="input-group">
+                                        <label>Weight</label>
+                                        <input
+                                          type="number"
+                                          step="5"
+                                          value={setData.weight || ''}
+                                          onChange={(e) => updateGPPSet(roundIdx + 1, slotIdx, 'weight', e.target.value)}
+                                          placeholder="0"
+                                        />
+                                        <span className="unit">{program.units}</span>
+                                      </div>
+                                      <div className="input-group">
+                                        <label>Reps</label>
+                                        <input
+                                          type="number"
+                                          value={setData.reps || ''}
+                                          onChange={(e) => updateGPPSet(roundIdx + 1, slotIdx, 'reps', e.target.value)}
+                                          placeholder="0"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <button 
+                  className="btn-complete-workout btn-large"
+                  onClick={handleCompleteWorkout}
+                >
+                  Complete Workout
+                </button>
+              </>
+            )}
+
+            {selectedSession.exercises && !selectedSession.mainSets && !selectedSession.isInteractive && (
+              <>
+                <div className="non-lifting-workout">
+                  {selectedSession.notes && selectedSession.notes.length > 0 && (
+                    <div className="workout-notes">
+                      {selectedSession.notes.map((note, idx) => (
+                        <p key={idx}>{note}</p>
+                      ))}
+                    </div>
+                  )}
+                  <div className="exercise-list">
+                    {selectedSession.exercises.map((exercise, idx) => (
+                      <div key={idx} className="exercise-item">
+                        <h4>{exercise.name}</h4>
+                        {exercise.sets && <p>{exercise.sets} sets × {exercise.reps} reps</p>}
+                        {exercise.duration && <p>{exercise.duration}</p>}
+                        {exercise.notes && <p className="exercise-notes">{exercise.notes}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <button 
+                  className="btn-complete-workout btn-large"
+                  onClick={handleCompleteWorkout}
+                >
+                  Complete Workout
+                </button>
+              </>
+            )}
 
             {selectedSession.mainSets && (
               <>
@@ -650,13 +846,6 @@ function ProgramView({ onClose }) {
                           </ul>
                         </div>
                       )}
-
-                      <button 
-                        className="btn-complete-workout"
-                        onClick={() => handleCompleteWorkout(currentWeek, session)}
-                      >
-                        Complete Workout
-                      </button>
                     </>
                   )}
                 </div>

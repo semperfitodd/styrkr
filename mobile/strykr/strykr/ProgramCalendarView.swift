@@ -4,9 +4,12 @@ struct ProgramCalendarView: View {
     let program: GeneratedProgram
     let completedWorkouts: Set<String>
     let onDaySelected: (Date, ProgramSession?) -> Void
+    @Binding var daySwaps: [String: [String: Any]]
+    let onSwapUpdate: ([String: [String: Any]]) -> Void
     
     @State private var currentMonth: Date = Date()
     @State private var selectedDate: Date?
+    @State private var draggedDate: Date?
     
     private let calendar = Calendar.current
     private let dateFormatter: DateFormatter = {
@@ -65,12 +68,31 @@ struct ProgramCalendarView: View {
                             session: sessionForDate(date),
                             isCompleted: isDateCompleted(date),
                             isSelected: calendar.isDate(date, inSameDayAs: selectedDate ?? Date.distantPast),
-                            isCurrentMonth: calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
+                            isCurrentMonth: calendar.isDate(date, equalTo: currentMonth, toGranularity: .month),
+                            isDragging: draggedDate != nil && calendar.isDate(date, inSameDayAs: draggedDate!)
                         )
                         .onTapGesture {
                             selectedDate = date
                             onDaySelected(date, sessionForDate(date))
                         }
+                        .onDrag {
+                            if sessionForDate(date) != nil && isInCurrentWeek(date) {
+                                draggedDate = date
+                                return NSItemProvider(object: dateFormatter.string(from: date) as NSString)
+                            }
+                            return NSItemProvider()
+                        }
+                        .onDrop(of: [.text], delegate: DayDropDelegate(
+                            targetDate: date,
+                            draggedDate: $draggedDate,
+                            program: program,
+                            daySwaps: $daySwaps,
+                            calendar: calendar,
+                            dateFormatter: dateFormatter,
+                            isInCurrentWeek: isInCurrentWeek,
+                            sessionForDate: sessionForDate,
+                            onSwapUpdate: onSwapUpdate
+                        ))
                     } else {
                         Color.clear
                             .frame(height: 70)
@@ -114,12 +136,34 @@ struct ProgramCalendarView: View {
     }
     
     private func sessionForDate(_ date: Date) -> ProgramSession? {
+        let dateString = dateFormatter.string(from: date)
+        
+        if let swappedSessionData = daySwaps[dateString],
+           let sessionId = swappedSessionData["sessionId"] as? String {
+            for week in program.weeks {
+                for session in week.sessions {
+                    if session.mainLift.liftName == sessionId || 
+                       session.mainLift.liftName.lowercased() == sessionId.lowercased() {
+                        return session
+                    }
+                }
+            }
+        }
+        
         for week in program.weeks {
             if let session = week.sessions.first(where: { calendar.isDate($0.date, inSameDayAs: date) }) {
                 return session
             }
         }
         return nil
+    }
+    
+    private func isInCurrentWeek(_ date: Date) -> Bool {
+        guard let selectedWeekStart = calendar.dateInterval(of: .weekOfYear, for: selectedDate ?? Date())?.start,
+              let dateWeekStart = calendar.dateInterval(of: .weekOfYear, for: date)?.start else {
+            return false
+        }
+        return calendar.isDate(selectedWeekStart, inSameDayAs: dateWeekStart)
     }
     
     private func isDateCompleted(_ date: Date) -> Bool {
@@ -142,6 +186,7 @@ struct DayCell: View {
     let isCompleted: Bool
     let isSelected: Bool
     let isCurrentMonth: Bool
+    let isDragging: Bool
     
     private var dayNumber: String {
         let formatter = DateFormatter()
@@ -192,7 +237,7 @@ struct DayCell: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(isSelected ? Color(hex: "667eea") : Color.clear, lineWidth: 2)
         )
-        .opacity(isCompleted ? 0.8 : 1.0)
+        .opacity(isDragging ? 0.5 : (isCompleted ? 0.8 : 1.0))
         .padding(2)
     }
     
@@ -218,6 +263,68 @@ struct DayCell: View {
             return .green.opacity(0.6)
         }
         return Color(hex: "667eea").opacity(0.8)
+    }
+}
+
+struct DayDropDelegate: DropDelegate {
+    let targetDate: Date
+    @Binding var draggedDate: Date?
+    let program: GeneratedProgram
+    @Binding var daySwaps: [String: [String: Any]]
+    let calendar: Calendar
+    let dateFormatter: DateFormatter
+    let isInCurrentWeek: (Date) -> Bool
+    let sessionForDate: (Date) -> ProgramSession?
+    let onSwapUpdate: ([String: [String: Any]]) -> Void
+    
+    func performDrop(info: DropInfo) -> Bool {
+        guard let draggedDate = draggedDate else { return false }
+        
+        guard !calendar.isDate(draggedDate, inSameDayAs: targetDate) else {
+            self.draggedDate = nil
+            return false
+        }
+        
+        guard isInCurrentWeek(draggedDate) && isInCurrentWeek(targetDate) else {
+            self.draggedDate = nil
+            return false
+        }
+        
+        guard let draggedSession = sessionForDate(draggedDate),
+              let targetSession = sessionForDate(targetDate) else {
+            self.draggedDate = nil
+            return false
+        }
+        
+        let draggedDateString = dateFormatter.string(from: draggedDate)
+        let targetDateString = dateFormatter.string(from: targetDate)
+        
+        var newSwaps = daySwaps
+        
+        let draggedSessionData: [String: Any] = [
+            "sessionId": draggedSession.mainLift.liftName,
+            "label": draggedSession.mainLift.liftName,
+            "mainLiftId": draggedSession.mainLift.liftName.lowercased()
+        ]
+        
+        let targetSessionData: [String: Any] = [
+            "sessionId": targetSession.mainLift.liftName,
+            "label": targetSession.mainLift.liftName,
+            "mainLiftId": targetSession.mainLift.liftName.lowercased()
+        ]
+        
+        newSwaps[draggedDateString] = targetSessionData
+        newSwaps[targetDateString] = draggedSessionData
+        
+        daySwaps = newSwaps
+        onSwapUpdate(newSwaps)
+        
+        self.draggedDate = nil
+        return true
+    }
+    
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        return DropProposal(operation: .move)
     }
 }
 

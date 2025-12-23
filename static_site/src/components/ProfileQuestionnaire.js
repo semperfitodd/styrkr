@@ -13,7 +13,7 @@ function ProfileQuestionnaire({ onComplete }) {
     preferredStartDay: 'mon',
     preferredUnits: 'lb',
     nonLiftingDaysEnabled: true,
-    nonLiftingDayMode: 'pilates',
+    nonLiftingDayMode: 'gpp',
     conditioningLevel: 'moderate',
   });
 
@@ -54,7 +54,7 @@ function ProfileQuestionnaire({ onComplete }) {
   };
 
   const isStep1Valid = () => {
-    return profile.trainingDaysPerWeek >= 3 && profile.trainingDaysPerWeek <= 6;
+    return profile.trainingDaysPerWeek >= 4 && profile.trainingDaysPerWeek <= 7;
   };
 
 
@@ -80,7 +80,7 @@ function ProfileQuestionnaire({ onComplete }) {
             <div className="form-group">
               <label>How many days per week will you train?</label>
               <div className="day-selector">
-                {[3, 4, 5, 6].map((days) => (
+                {[4, 5, 6, 7].map((days) => (
                   <button
                     key={days}
                     type="button"
@@ -91,6 +91,7 @@ function ProfileQuestionnaire({ onComplete }) {
                   </button>
                 ))}
               </div>
+              <p className="help-text">4 days = main lifts only. 5-7 days adds GPP, mobility, or active recovery.</p>
             </div>
 
             <div className="form-group">

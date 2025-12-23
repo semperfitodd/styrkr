@@ -31,9 +31,6 @@ def get_schedule(user_context: dict, query_params: dict, request_id: str, event:
 
 def put_schedule(user_context: dict, body: dict, request_id: str, event: dict) -> dict:
     try:
-        if 'daySwaps' not in body:
-            return error_response(400, 'VALIDATION_ERROR', 'Missing daySwaps field', request_id)
-        
         now = datetime.utcnow().isoformat() + 'Z'
         user_email = user_context['email']
         
@@ -45,7 +42,8 @@ def put_schedule(user_context: dict, body: dict, request_id: str, event: dict) -
             'userEmail': user_email,
             'dataType': DATA_TYPE,
             'userId': user_context['userId'],
-            'daySwaps': convert_floats_to_decimals(body['daySwaps']),
+            'daySwaps': convert_floats_to_decimals(body.get('daySwaps', {})),
+            'dayAssignments': body.get('dayAssignments', {}),
             'createdAt': existing.get('createdAt', now),
             'updatedAt': now
         }

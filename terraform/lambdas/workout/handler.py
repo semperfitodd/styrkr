@@ -47,7 +47,7 @@ def get_workouts(user_email: str, query_params: dict, request_id: str) -> dict:
 
 def post_workout(user_email: str, body: dict, request_id: str) -> dict:
     try:
-        if not body.get('workoutDate') or not body.get('sessionId') or not body.get('programWeek'):
+        if not body.get('workoutDate') or not body.get('sessionId'):
             return error_response(400, 'VALIDATION_ERROR', 'Missing required fields', request_id)
         
         now = datetime.utcnow().isoformat() + 'Z'
@@ -55,16 +55,30 @@ def post_workout(user_email: str, body: dict, request_id: str) -> dict:
         workout = {
             'userEmail': user_email,
             'workoutDate': body['workoutDate'],
-            'programWeek': int(body['programWeek']),
             'sessionId': body['sessionId'],
-            'mainLift': convert_floats_to_decimals(body.get('mainLift', {})),
-            'circuit': convert_floats_to_decimals(body.get('circuit')),
-            'notes': body.get('notes'),
-            'duration': body.get('duration'),
             'createdAt': now
         }
+
+        if body.get('programWeek'):
+            workout['programWeek'] = int(body['programWeek'])
         
-        workout = {k: v for k, v in workout.items() if v is not None}
+        if body.get('mainLift'):
+            workout['mainLift'] = convert_floats_to_decimals(body['mainLift'])
+        
+        if body.get('circuit'):
+            workout['circuit'] = convert_floats_to_decimals(body['circuit'])
+        
+        if body.get('gppCircuit'):
+            workout['gppCircuit'] = convert_floats_to_decimals(body['gppCircuit'])
+        
+        if body.get('nonLiftingDay'):
+            workout['nonLiftingDay'] = convert_floats_to_decimals(body['nonLiftingDay'])
+        
+        if body.get('notes'):
+            workout['notes'] = body['notes']
+        
+        if body.get('duration'):
+            workout['duration'] = body['duration']
         
         workout_table.put_item(Item=workout)
         

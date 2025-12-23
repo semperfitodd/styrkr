@@ -4,12 +4,17 @@ import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
 import ProfileQuestionnaire from './components/ProfileQuestionnaire';
 import { api, ApiError } from './api/client';
+import { preloadConfigs } from './utils/configCache';
 import './App.css';
 
 function AppContent() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [appState, setAppState] = useState('loading'); // loading, login, questionnaire, home
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    preloadConfigs();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
