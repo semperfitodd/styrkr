@@ -1,8 +1,8 @@
 from typing import Dict, Tuple
 
 def validate_profile(profile: dict) -> Tuple[bool, str | None]:
-    if not isinstance(profile.get('trainingDaysPerWeek'), int) or not (3 <= profile['trainingDaysPerWeek'] <= 6):
-        return False, "trainingDaysPerWeek must be between 3 and 6"
+    if not isinstance(profile.get('trainingDaysPerWeek'), int) or not (4 <= profile['trainingDaysPerWeek'] <= 7):
+        return False, "trainingDaysPerWeek must be between 4 and 7"
     
     if profile.get('preferredUnits') not in ['lb', 'kg']:
         return False, "preferredUnits must be 'lb' or 'kg'"

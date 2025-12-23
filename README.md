@@ -15,7 +15,7 @@ Styrkr generates a complete, long-term strength program based on your lifts. You
 
 ### Freedom without breaking the program
 
-Travel or miss a day? You can move workouts within the week without ruining progression or recovery. The plan adapts to real life instead of forcing you into a rigid calendar.
+Drag and drop workouts to swap days within the same week. Changes persist across devices and sessions.
 
 ### Smart exercise substitutions
 
@@ -190,16 +190,46 @@ Open `mobile/strykr/strykr.xcodeproj` in Xcode and run.
 - Cognito JWT authentication
 - OAuth 2.0 Authorization Code flow
 
+## Architecture
+
+### Backend
+- **Server-side program rendering** - Workouts computed on-demand from S3 config files
+- **S3 + CloudFront** - Exercise library & program templates cached at edge (10 min TTL)
+- **JWT validation** - All user data routes enforce Cognito JWT with `sub` claim
+- **DynamoDB keys** - `USER#{sub}` partition, sort keys: `PROFILE`, `STRENGTH`, `PROGRAM_SETTINGS`, `WORKOUT_LOG#{date}`
+
+### API Endpoints
+**Public (no auth):**
+- `GET /program/template` - Program template
+- `GET /exercises` - Exercise library
+
+**Protected (JWT required):**
+- `GET/POST /program/settings` - User program settings
+- `GET /program/week?weekIndex=N` - Server-rendered week with computed weights & selected exercises
+- `GET /nonlift/day?type=X&weekIndex=N` - Generate GPP/Mobility/Active Recovery workouts
+- `GET/PUT /profile` - User profile
+- `GET/PUT /strength` - 1RM data
+- `GET/POST /workout` - Workout logs
+
+### Frontend
+- **Config caching** - localStorage with 10 min TTL
+- **On-demand generation** - Non-lifting days generated when user clicks button (not pre-generated)
+- **Week-by-week** - Fetches program data from server as needed
+
 ## Project Structure
 
 ```
 styrkr/
-├── app_config/              # Exercise library & program templates
+├── app_config/              # S3-hosted exercise library & program templates
 ├── mobile/strykr/           # iOS app (SwiftUI)
 ├── static_site/             # React web app
 └── terraform/               # Infrastructure
     ├── lambdas/             # Python Lambda functions
-    │   ├── shared/          # Shared utilities
+    │   ├── shared/          # S3 config, JWT validation, response utils
+    │   ├── config/          # Public config endpoints (no auth)
+    │   ├── program_settings/# Program settings CRUD
+    │   ├── program_week/    # Server-side week renderer
+    │   ├── nonlift/         # Non-lifting day generator
     │   ├── profile/         # User profile management
     │   ├── strength/        # 1RM & training max tracking
     │   └── workout/         # Workout history

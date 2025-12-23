@@ -20,11 +20,19 @@ struct ProgramView: View {
     @State private var selectedSession: ProgramSession?
     @State private var selectedDate: Date?
     @State private var showingWorkoutDetail = false
+    @State private var showingGPPWorkout = false
+    @State private var showingSimpleWorkout = false
     
     @State private var editableCircuit: EditableCircuit?
+    @State private var gppWorkout: GPPWorkout?
+    @State private var simpleWorkout: SimpleWorkout?
+    @State private var workoutGenerator: WorkoutGenerator?
+    @State private var exerciseLibrary: ExerciseLibrary?
     
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var daySwaps: [String: [String: Any]] = [:]
+    @State private var showingResetAlert = false
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -73,9 +81,25 @@ struct ProgramView: View {
                             ProgramCalendarView(
                                 program: program,
                                 completedWorkouts: completedWorkouts,
-                                onDaySelected: handleDaySelected
+                                onDaySelected: handleDaySelected,
+                                daySwaps: $daySwaps,
+                                onSwapUpdate: handleSwapUpdate
                             )
                             .padding()
+                            
+                            if !daySwaps.isEmpty {
+                                Button(action: { showingResetAlert = true }) {
+                                    HStack {
+                                        Image(systemName: "arrow.counterclockwise")
+                                        Text("Reset Schedule")
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.red.opacity(0.7))
+                                    .cornerRadius(10)
+                                }
+                                .padding(.bottom)
+                            }
                         }
                     }
                 }
@@ -111,9 +135,43 @@ struct ProgramView: View {
                     .navigationViewStyle(.stack)
                 }
             }
+            .sheet(isPresented: $showingGPPWorkout) {
+                if let workout = gppWorkout, let date = selectedDate, let program = program {
+                    NavigationView {
+                        GPPWorkoutView(
+                            workout: workout,
+                            date: date,
+                            weekNumber: weekNumberForDate(date, program: program),
+                            onComplete: handleCompleteWorkout
+                        )
+                    }
+                    .navigationViewStyle(.stack)
+                }
+            }
+            .sheet(isPresented: $showingSimpleWorkout) {
+                if let workout = simpleWorkout, let date = selectedDate, let program = program {
+                    NavigationView {
+                        SimpleWorkoutView(
+                            workout: workout,
+                            date: date,
+                            weekNumber: weekNumberForDate(date, program: program),
+                            onComplete: handleCompleteWorkout
+                        )
+                    }
+                    .navigationViewStyle(.stack)
+                }
+            }
         }
         .task {
             await loadData()
+        }
+        .alert("Reset Schedule", isPresented: $showingResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                Task { await resetSchedule() }
+            }
+        } message: {
+            Text("This will reset all day swaps and restore the original schedule.")
         }
     }
     
@@ -161,6 +219,8 @@ struct ProgramView: View {
                 let data = try Data(contentsOf: url)
                 let library = try JSONDecoder().decode(ExerciseLibrary.self, from: data)
                 exercises = library.exercises
+                exerciseLibrary = library
+                workoutGenerator = WorkoutGenerator(exerciseLibrary: library)
             }
             
             if let url = Bundle.main.url(forResource: "plan.template", withExtension: "json") {
@@ -180,6 +240,7 @@ struct ProgramView: View {
                     )
                     
                     await loadWorkoutHistory()
+                    await loadScheduleCustomizations()
                 }
                 
                 await MainActor.run {
@@ -256,9 +317,91 @@ struct ProgramView: View {
         selectedDate = date
         selectedSession = session
         
+        guard let profile = profile, let program = program else { return }
+        
         if let session = session {
             editableCircuit = EditableCircuit(from: session.circuit)
             showingWorkoutDetail = true
+        } else {
+            let dayOfWeek = Calendar.current.component(.weekday, from: date) - 1
+            let weekNumber = weekNumberForDate(date, program: program)
+            let weekPhase = getWeekPhase(weekNumber: weekNumber)
+            
+            if let nonLiftingType = getNonLiftingDayType(dayOfWeek: dayOfWeek, profile: profile) {
+                generateNonLiftingWorkout(type: nonLiftingType, profile: profile, weekPhase: weekPhase)
+            }
+        }
+    }
+    
+    private func getNonLiftingDayType(dayOfWeek: Int, profile: Profile) -> DayType? {
+        let trainingDays = profile.trainingDaysPerWeek
+        let preferredMode = profile.nonLiftingDayMode
+        
+        let mainDays: Set<Int> = [1, 2, 4, 5]
+        
+        if mainDays.contains(dayOfWeek) {
+            return nil
+        }
+        
+        if trainingDays >= 5 && dayOfWeek == 3 {
+            return DayType(rawValue: preferredMode) ?? .gpp
+        }
+        
+        if trainingDays >= 6 && dayOfWeek == 6 {
+            return DayType(rawValue: preferredMode) ?? .gpp
+        }
+        
+        if trainingDays >= 7 && dayOfWeek == 0 {
+            return DayType(rawValue: preferredMode) ?? .gpp
+        }
+        
+        return nil
+    }
+    
+    private func generateNonLiftingWorkout(type: DayType, profile: Profile, weekPhase: String) {
+        guard let generator = workoutGenerator else { return }
+        
+        switch type {
+        case .gpp:
+            gppWorkout = generator.generateGPPWorkout(options: WorkoutOptions(profile: profile, weekPhase: weekPhase))
+            showingGPPWorkout = true
+        case .mobility:
+            simpleWorkout = generator.generateMobilityWorkout(options: WorkoutOptions(profile: profile, weekPhase: weekPhase))
+            showingSimpleWorkout = true
+        case .rest:
+            simpleWorkout = generator.generateActiveRecoveryWorkout(options: WorkoutOptions(profile: profile, weekPhase: weekPhase))
+            showingSimpleWorkout = true
+        case .pilates:
+            simpleWorkout = generator.generatePilatesWorkout()
+            showingSimpleWorkout = true
+        case .main:
+            break
+        }
+    }
+    
+    private func weekNumberForDate(_ date: Date, program: GeneratedProgram) -> Int {
+        let calendar = Calendar.current
+        let daysDiff = calendar.dateComponents([.day], from: program.startDate, to: date).day ?? 0
+        return (daysDiff / 7) + 1
+    }
+    
+    private func getWeekPhase(weekNumber: Int) -> String {
+        let weekInCycle = ((weekNumber - 1) % 12) + 1
+        
+        if weekInCycle <= 3 {
+            return "LEADER"
+        } else if weekInCycle == 4 {
+            return "DELOAD"
+        } else if weekInCycle <= 6 {
+            return "ANCHOR"
+        } else if weekInCycle == 7 {
+            return "TEST"
+        } else if weekInCycle == 8 {
+            return "RESET"
+        } else if weekInCycle <= 11 {
+            return "LEADER"
+        } else {
+            return "DELOAD"
         }
     }
     
@@ -309,6 +452,40 @@ struct ProgramView: View {
             } catch {
                 return
             }
+        }
+    }
+    
+    private func loadScheduleCustomizations() async {
+        do {
+            let customizations = try await APIClient.shared.getScheduleCustomizations()
+            await MainActor.run {
+                if let swaps = customizations["daySwaps"] as? [String: [String: Any]] {
+                    daySwaps = swaps
+                }
+            }
+        } catch {
+            return
+        }
+    }
+    
+    private func handleSwapUpdate(_ newSwaps: [String: [String: Any]]) {
+        Task {
+            do {
+                try await APIClient.shared.updateScheduleCustomizations(["daySwaps": newSwaps])
+            } catch {
+                print("Error saving schedule customizations: \(error)")
+            }
+        }
+    }
+    
+    private func resetSchedule() async {
+        do {
+            try await APIClient.shared.updateScheduleCustomizations(["daySwaps": [:]])
+            await MainActor.run {
+                daySwaps = [:]
+            }
+        } catch {
+            print("Error resetting schedule: \(error)")
         }
     }
 }

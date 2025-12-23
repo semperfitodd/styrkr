@@ -102,6 +102,106 @@ class APIClient {
     func logWorkout(_ workout: WorkoutData) async throws -> WorkoutData {
         return try await makeRequest(endpoint: "/workout", method: "POST", body: workout)
     }
+    
+    func logWorkout(_ workout: [String: Any]) async throws {
+        guard let token = getAuthToken() else {
+            throw APIError.unauthorized
+        }
+        
+        guard let url = URL(string: "\(baseURL)/workout") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: workout)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            return
+        case 401:
+            throw APIError.unauthorized
+        case 404:
+            throw APIError.notFound
+        default:
+            throw APIError.serverError("Status code: \(httpResponse.statusCode)")
+        }
+    }
+    
+    func getScheduleCustomizations() async throws -> [String: Any] {
+        guard let token = getAuthToken() else {
+            throw APIError.unauthorized
+        }
+        
+        guard let url = URL(string: "\(baseURL)/schedule") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                return json
+            }
+            return [:]
+        case 404:
+            return [:]
+        case 401:
+            throw APIError.unauthorized
+        default:
+            throw APIError.serverError("Status code: \(httpResponse.statusCode)")
+        }
+    }
+    
+    func updateScheduleCustomizations(_ customizations: [String: Any]) async throws {
+        guard let token = getAuthToken() else {
+            throw APIError.unauthorized
+        }
+        
+        guard let url = URL(string: "\(baseURL)/schedule") else {
+            throw APIError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: customizations)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            return
+        case 401:
+            throw APIError.unauthorized
+        default:
+            throw APIError.serverError("Status code: \(httpResponse.statusCode)")
+        }
+    }
 }
 
 enum APIError: LocalizedError {

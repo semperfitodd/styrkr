@@ -106,6 +106,56 @@ export const api = {
     });
   },
 
+  async getScheduleCustomizations() {
+    return apiRequest('/schedule', { method: 'GET' });
+  },
+
+  async updateScheduleCustomizations(customizations) {
+    return apiRequest('/schedule', {
+      method: 'PUT',
+      body: JSON.stringify(customizations),
+    });
+  },
+
+  // Public config endpoints (no auth)
+  async getTemplate() {
+    const response = await fetch(`${API_BASE_URL}/program/template`);
+    if (!response.ok) {
+      throw new ApiError('Failed to fetch template', 'FETCH_ERROR', response.status, null);
+    }
+    return response.json();
+  },
+
+  async getExercises() {
+    const response = await fetch(`${API_BASE_URL}/exercises`);
+    if (!response.ok) {
+      throw new ApiError('Failed to fetch exercises', 'FETCH_ERROR', response.status, null);
+    }
+    return response.json();
+  },
+
+  // Program settings (with auth)
+  async getProgramSettings() {
+    return apiRequest('/program/settings', { method: 'GET' });
+  },
+
+  async saveProgramSettings(settings) {
+    return apiRequest('/program/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    });
+  },
+
+  // Week renderer (with auth)
+  async getWeek(weekIndex) {
+    return apiRequest(`/program/week?weekIndex=${weekIndex}`, { method: 'GET' });
+  },
+
+  // Non-lifting day generator (with auth)
+  async generateNonLiftDay(type, weekIndex) {
+    return apiRequest(`/nonlift/day?type=${type}&weekIndex=${weekIndex}`, { method: 'GET' });
+  },
+
 };
 
 export { ApiError };

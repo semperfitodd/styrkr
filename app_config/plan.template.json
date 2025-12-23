@@ -1,400 +1,737 @@
 {
-  "library": "styrkr",
-  "type": "program_template",
-  "programId": "531_krypteia_v1",
-  "programName": "5/3/1 Krypteia (Leader/Anchor/Test)",
-  "version": 1,
-  "publishedAt": "2025-12-21T00:00:00Z",
-  "notes": [
-    "This template is user-agnostic. The app must supply Training Maxes (TM) per lift and unit rounding rules.",
-    "Rendering uses TM-based percentages. No planned workouts are stored per day; only overrides and workout logs are stored.",
-    "Extra non-lifting days (0-3) are placeholders; app fills based on profile settings."
-  ],
-  "inputs": {
-    "required": [
-      "trainingMaxes.squat",
-      "trainingMaxes.bench",
-      "trainingMaxes.deadlift",
-      "trainingMaxes.ohp",
-      "units",
-      "roundingRule"
+    "library": "styrkr",
+    "type": "program_template",
+    "programId": "531_krypteia_v1",
+    "programName": "5/3/1 Krypteia (Leader/Anchor/Test)",
+    "version": 2,
+    "publishedAt": "2025-12-23T00:00:00Z",
+    "notes": [
+        "This template is user-agnostic. The app must supply Training Maxes (TM) per lift and unit rounding rules.",
+        "Rendering uses TM-based percentages. No planned workouts are stored per day; only overrides and workout logs are stored.",
+        "Extra non-lifting days (0-3) are placeholders; app fills based on profile settings."
     ],
-    "optional": [
-      "conditioningLevel",
-      "nonLiftingDaysEnabled",
-      "nonLiftingDayMode"
-    ]
-  },
-  "roundingRules": {
-    "lb": { "increment": 5 },
-    "kg": { "increment": 2.5 }
-  },
-  "tmProgression": {
-    "whenRestartingAfterTestWeek": {
-      "method": "recalculate_from_tested_1rm",
-      "defaultTmPercent": 0.85
-    },
-    "alternativeSimpleMethod": {
-      "method": "fixed_increase_to_tm",
-      "squat_deadlift_add": { "lb": 10, "kg": 5 },
-      "bench_ohp_add": { "lb": 5, "kg": 2.5 }
-    }
-  },
-  "weekModel": {
-    "type": "floating_week",
-    "description": "A training week contains 4 lift sessions. Sessions can be performed in any order; week advances when all required sessions are completed or user manually advances."
-  },
-  "extraNonLiftingDays": {
-    "min": 0,
-    "max": 3,
-    "placeholders": [
-      { "dayId": "X1", "label": "Non-Lifting Day 1" },
-      { "dayId": "X2", "label": "Non-Lifting Day 2" },
-      { "dayId": "X3", "label": "Non-Lifting Day 3" }
-    ],
-    "handledByAppLogic": true
-  },
-  "slotTaxonomy": {
-    "supplemental": [
-      "fsl_main_lift"
-    ],
-    "accessory": [
-      "upper_push",
-      "upper_pull",
-      "single_leg_or_core",
-      "core_anti_extension",
-      "core_anti_rotation",
-      "carry",
-      "scap_stability"
-    ],
-    "conditioning": [
-      "intervals_short",
-      "steady_state",
-      "jump_rope"
-    ],
-    "mobility": [
-      "hip_ir_er",
-      "hip_flexor",
-      "adductor",
-      "ankles",
-      "t_spine"
-    ]
-  },
-  "lifts": [
-    { "liftId": "squat", "displayName": "Squat" },
-    { "liftId": "bench", "displayName": "Bench Press" },
-    { "liftId": "deadlift", "displayName": "Deadlift" },
-    { "liftId": "ohp", "displayName": "Overhead Press" }
-  ],
-  "setSchemes": {
-    "classic_531_week_1": {
-      "label": "Week 1 (5s)",
-      "workSets": [
-        { "pctTM": 0.65, "reps": 5 },
-        { "pctTM": 0.75, "reps": 5 },
-        { "pctTM": 0.85, "reps": 5 }
-      ]
-    },
-    "classic_531_week_2": {
-      "label": "Week 2 (3s)",
-      "workSets": [
-        { "pctTM": 0.70, "reps": 3 },
-        { "pctTM": 0.80, "reps": 3 },
-        { "pctTM": 0.90, "reps": 3 }
-      ]
-    },
-    "classic_531_week_3": {
-      "label": "Week 3 (5/3/1)",
-      "workSets": [
-        { "pctTM": 0.75, "reps": 5 },
-        { "pctTM": 0.85, "reps": 3 },
-        { "pctTM": 0.95, "reps": 1 }
-      ]
-    },
-    "fives_pro_week_1": {
-      "label": "5's PRO Week 1",
-      "workSets": [
-        { "pctTM": 0.65, "reps": 5 },
-        { "pctTM": 0.75, "reps": 5 },
-        { "pctTM": 0.85, "reps": 5 }
-      ]
-    },
-    "fives_pro_week_2": {
-      "label": "5's PRO Week 2",
-      "workSets": [
-        { "pctTM": 0.70, "reps": 5 },
-        { "pctTM": 0.80, "reps": 5 },
-        { "pctTM": 0.90, "reps": 5 }
-      ]
-    },
-    "fives_pro_week_3": {
-      "label": "5's PRO Week 3",
-      "workSets": [
-        { "pctTM": 0.75, "reps": 5 },
-        { "pctTM": 0.85, "reps": 5 },
-        { "pctTM": 0.95, "reps": 5 }
-      ]
-    },
-    "deload_40_50_60": {
-      "label": "Deload",
-      "workSets": [
-        { "pctTM": 0.40, "reps": 5 },
-        { "pctTM": 0.50, "reps": 5 },
-        { "pctTM": 0.60, "reps": 5 }
-      ]
-    },
-    "heavy_singles": {
-      "label": "Heavy Singles (controlled)",
-      "workSets": [
-        { "pctTM": 0.70, "reps": 3 },
-        { "pctTM": 0.80, "reps": 2 },
-        { "pctTM": 0.90, "reps": 1 },
-        { "pctTM": 0.95, "reps": 1 }
-      ],
-      "rules": {
-        "lastSetOptional": true,
-        "barSpeedGate": true,
-        "noGrinders": true
-      }
-    }
-  },
-  "sessionTemplates": {
-    "SQUAT_DAY": {
-      "sessionId": "SQUAT",
-      "label": "Squat",
-      "mainLiftId": "squat",
-      "supplemental": [
-        {
-          "type": "fsl_main_lift",
-          "label": "FSL (Main Lift)",
-          "sets": 5,
-          "repsRange": [3, 10],
-          "notes": [
-            "Performed as part of a circuit with assistance slots."
-          ]
-        }
-      ],
-      "assistanceSlots": [
-        { "slotId": "upper_push", "minReps": 10, "maxReps": 20 },
-        { "slotId": "upper_pull", "minReps": 10, "maxReps": 20 }
-      ],
-      "circuit": {
-        "enabled": true,
-        "rounds": 5,
-        "style": "EMOMish",
-        "notes": [
-          "Circuit is (FSL) + (upper push) + (upper pull).",
-          "App selects exercises for slots using exercise library + user constraints."
+    "inputs": {
+        "required": [
+            "trainingMaxes.squat",
+            "trainingMaxes.bench",
+            "trainingMaxes.deadlift",
+            "trainingMaxes.ohp",
+            "units",
+            "roundingRule"
+        ],
+        "optional": [
+            "conditioningLevel",
+            "nonLiftingDaysEnabled",
+            "nonLiftingDayMode"
         ]
-      },
-      "conditioningSlots": [
-        { "slotId": "intervals_short", "optional": true }
-      ],
-      "mobilitySlots": [
-        { "slotId": "hip_ir_er", "optional": true },
-        { "slotId": "ankles", "optional": true }
-      ]
     },
-    "BENCH_DAY": {
-      "sessionId": "BENCH",
-      "label": "Bench Press",
-      "mainLiftId": "bench",
-      "supplemental": [
-        {
-          "type": "fsl_main_lift",
-          "label": "FSL (Main Lift)",
-          "sets": 5,
-          "repsRange": [3, 10],
-          "notes": [
-            "Performed as part of a circuit with assistance slots."
-          ]
-        }
-      ],
-      "assistanceSlots": [
-        { "slotId": "single_leg_or_core", "minReps": 10, "maxReps": 20 },
-        { "slotId": "upper_pull", "minReps": 10, "maxReps": 20 }
-      ],
-      "circuit": {
-        "enabled": true,
-        "rounds": 5,
-        "style": "EMOMish",
-        "notes": [
-          "Circuit is (FSL Bench) + (single-leg or core) + (upper pull)."
-        ]
-      },
-      "conditioningSlots": [
-        { "slotId": "intervals_short", "optional": true }
-      ],
-      "mobilitySlots": [
-        { "slotId": "hip_flexor", "optional": true },
-        { "slotId": "t_spine", "optional": true }
-      ]
-    },
-    "DEADLIFT_DAY": {
-      "sessionId": "DEADLIFT",
-      "label": "Deadlift",
-      "mainLiftId": "deadlift",
-      "supplemental": [
-        {
-          "type": "fsl_main_lift",
-          "label": "FSL (Main Lift)",
-          "sets": 5,
-          "repsRange": [3, 5],
-          "notes": [
-            "Deadlift FSL reps are typically lower than squat/bench."
-          ]
-        }
-      ],
-      "assistanceSlots": [
-        { "slotId": "upper_push", "minReps": 10, "maxReps": 20 },
-        { "slotId": "upper_pull", "minReps": 10, "maxReps": 20 }
-      ],
-      "circuit": {
-        "enabled": true,
-        "rounds": 5,
-        "style": "EMOMish",
-        "notes": [
-          "Circuit is (FSL Deadlift) + (upper push) + (upper pull)."
-        ]
-      },
-      "conditioningSlots": [
-        { "slotId": "intervals_short", "optional": true }
-      ],
-      "mobilitySlots": [
-        { "slotId": "hip_ir_er", "optional": true },
-        { "slotId": "adductor", "optional": true }
-      ]
-    },
-    "OHP_DAY": {
-      "sessionId": "OHP",
-      "label": "Overhead Press",
-      "mainLiftId": "ohp",
-      "supplemental": [
-        {
-          "type": "fsl_main_lift",
-          "label": "FSL (Main Lift)",
-          "sets": 5,
-          "repsRange": [3, 10],
-          "notes": [
-            "Performed as part of a circuit with assistance slots."
-          ]
-        }
-      ],
-      "assistanceSlots": [
-        { "slotId": "single_leg_or_core", "minReps": 10, "maxReps": 20 },
-        { "slotId": "upper_pull", "minReps": 10, "maxReps": 20 }
-      ],
-      "circuit": {
-        "enabled": true,
-        "rounds": 5,
-        "style": "EMOMish",
-        "notes": [
-          "Press day uses (single-leg or core) + (upper pull) to balance shoulder volume."
-        ]
-      },
-      "conditioningSlots": [
-        { "slotId": "intervals_short", "optional": true }
-      ],
-      "mobilitySlots": [
-        { "slotId": "t_spine", "optional": true },
-        { "slotId": "hip_flexor", "optional": true }
-      ]
-    }
-  },
-  "macrocycle": {
-    "cycleLengthWeeks": 13,
-    "phases": [
-      {
-        "phaseId": "LEADER",
-        "label": "Leader (Volume / Base)",
-        "weeks": [1, 2, 3, 4, 5, 6],
-        "mainLiftSchemeByWeekInCycle": {
-          "1": "fives_pro_week_1",
-          "2": "fives_pro_week_2",
-          "3": "fives_pro_week_3"
+    "roundingRules": {
+        "lb": {
+            "increment": 5
         },
-        "rules": {
-          "allowPRSets": false,
-          "topSetCapRPE": 8,
-          "supplementalUsesFSL": true,
-          "circuitRounds": 5
+        "kg": {
+            "increment": 2.5
         }
-      },
-      {
-        "phaseId": "DELOAD_1",
-        "label": "Deload",
-        "weeks": [7],
-        "mainLiftScheme": "deload_40_50_60",
-        "rules": {
-          "allowPRSets": false,
-          "supplementalEnabled": false,
-          "circuitRounds": 2,
-          "conditioningRecommended": "easy_only",
-          "mobilityRecommended": true
-        }
-      },
-      {
-        "phaseId": "ANCHOR",
-        "label": "Anchor (Intensity / Realization)",
-        "weeks": [8, 9, 10],
-        "mainLiftSchemeByWeekInCycle": {
-          "1": "classic_531_week_1",
-          "2": "classic_531_week_2",
-          "3": "classic_531_week_3"
+    },
+    "tmProgression": {
+        "whenRestartingAfterTestWeek": {
+            "method": "recalculate_from_tested_1rm",
+            "defaultTmPercent": 0.85
         },
-        "rules": {
-          "allowPRSets": true,
-          "prSetWeek": 10,
-          "prSetOn": "last_work_set",
-          "topSetCapRPE": 9,
-          "supplementalUsesFSL": true,
-          "circuitRounds": 3
+        "alternativeSimpleMethod": {
+            "method": "fixed_increase_to_tm",
+            "squat_deadlift_add": {
+                "lb": 10,
+                "kg": 5
+            },
+            "bench_ohp_add": {
+                "lb": 5,
+                "kg": 2.5
+            }
         }
-      },
-      {
-        "phaseId": "DELOAD_2",
-        "label": "Deload",
-        "weeks": [11],
-        "mainLiftScheme": "deload_40_50_60",
-        "rules": {
-          "allowPRSets": false,
-          "supplementalEnabled": false,
-          "circuitRounds": 2,
-          "conditioningRecommended": "easy_only",
-          "mobilityRecommended": true
+    },
+    "weekModel": {
+        "type": "floating_week",
+        "description": "A training week contains 4 lift sessions. Sessions can be performed in any order; week advances when all required sessions are completed or user manually advances."
+    },
+    "extraNonLiftingDays": {
+        "min": 0,
+        "max": 3,
+        "placeholders": [
+            {
+                "dayId": "X1",
+                "label": "Non-Lifting Day 1",
+                "allowedTypes": [
+                    "gpp_krypteia",
+                    "mobility",
+                    "active_recovery",
+                    "pilates"
+                ]
+            },
+            {
+                "dayId": "X2",
+                "label": "Non-Lifting Day 2",
+                "allowedTypes": [
+                    "gpp_krypteia",
+                    "mobility",
+                    "active_recovery",
+                    "pilates"
+                ]
+            },
+            {
+                "dayId": "X3",
+                "label": "Non-Lifting Day 3",
+                "allowedTypes": [
+                    "gpp_krypteia",
+                    "mobility",
+                    "active_recovery",
+                    "pilates"
+                ]
+            }
+        ],
+        "handledByAppLogic": true
+    },
+    "slotTaxonomy": {
+        "supplemental": [
+            "fsl_main_lift"
+        ],
+        "accessory": [
+            "upper_push",
+            "upper_pull",
+            "single_leg_or_core",
+            "core_anti_extension",
+            "core_anti_rotation",
+            "carry",
+            "scap_stability"
+        ],
+        "conditioning": [
+            "intervals_short",
+            "steady_state",
+            "jump_rope"
+        ],
+        "mobility": [
+            "hip_ir_er",
+            "hip_flexor",
+            "adductor",
+            "ankles",
+            "t_spine"
+        ]
+    },
+    "lifts": [
+        {
+            "liftId": "squat",
+            "displayName": "Squat"
+        },
+        {
+            "liftId": "bench",
+            "displayName": "Bench Press"
+        },
+        {
+            "liftId": "deadlift",
+            "displayName": "Deadlift"
+        },
+        {
+            "liftId": "ohp",
+            "displayName": "Overhead Press"
         }
-      },
-      {
-        "phaseId": "TEST",
-        "label": "Test Week",
-        "weeks": [12],
-        "rules": {
-          "testType": "1rm",
-          "testOrder": ["squat", "bench", "deadlift", "ohp"],
-          "separateDaysRecommended": true,
-          "noMisses": true,
-          "stopOnGrind": true
-        }
-      },
-      {
-        "phaseId": "RESET",
-        "label": "Reset / Start Next Cycle",
-        "weeks": [13],
-        "rules": {
-          "action": "recalculate_tm_and_restart",
-          "defaultTmPercent": 0.85,
-          "notes": [
-            "App should prompt user to confirm new 1RMs (from test week) and recalculate TMs.",
-            "Then restart macrocycle at Week 1."
-          ]
-        }
-      }
     ],
-    "weeklySessions": [
-      { "slotIndex": 1, "sessionTemplateRef": "SQUAT_DAY" },
-      { "slotIndex": 2, "sessionTemplateRef": "BENCH_DAY" },
-      { "slotIndex": 3, "sessionTemplateRef": "DEADLIFT_DAY" },
-      { "slotIndex": 4, "sessionTemplateRef": "OHP_DAY" }
-    ]
-  }
+    "setSchemes": {
+        "classic_531_week_1": {
+            "label": "Week 1 (5s)",
+            "workSets": [
+                {
+                    "pctTM": 0.65,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.75,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.85,
+                    "reps": 5
+                }
+            ]
+        },
+        "classic_531_week_2": {
+            "label": "Week 2 (3s)",
+            "workSets": [
+                {
+                    "pctTM": 0.7,
+                    "reps": 3
+                },
+                {
+                    "pctTM": 0.8,
+                    "reps": 3
+                },
+                {
+                    "pctTM": 0.9,
+                    "reps": 3
+                }
+            ]
+        },
+        "classic_531_week_3": {
+            "label": "Week 3 (5/3/1)",
+            "workSets": [
+                {
+                    "pctTM": 0.75,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.85,
+                    "reps": 3
+                },
+                {
+                    "pctTM": 0.95,
+                    "reps": 1
+                }
+            ]
+        },
+        "fives_pro_week_1": {
+            "label": "5's PRO Week 1",
+            "workSets": [
+                {
+                    "pctTM": 0.65,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.75,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.85,
+                    "reps": 5
+                }
+            ]
+        },
+        "fives_pro_week_2": {
+            "label": "5's PRO Week 2",
+            "workSets": [
+                {
+                    "pctTM": 0.7,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.8,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.9,
+                    "reps": 5
+                }
+            ]
+        },
+        "fives_pro_week_3": {
+            "label": "5's PRO Week 3",
+            "workSets": [
+                {
+                    "pctTM": 0.75,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.85,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.95,
+                    "reps": 5
+                }
+            ]
+        },
+        "deload_40_50_60": {
+            "label": "Deload",
+            "workSets": [
+                {
+                    "pctTM": 0.4,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.5,
+                    "reps": 5
+                },
+                {
+                    "pctTM": 0.6,
+                    "reps": 5
+                }
+            ]
+        },
+        "heavy_singles": {
+            "label": "Heavy Singles (controlled)",
+            "workSets": [
+                {
+                    "pctTM": 0.7,
+                    "reps": 3
+                },
+                {
+                    "pctTM": 0.8,
+                    "reps": 2
+                },
+                {
+                    "pctTM": 0.9,
+                    "reps": 1
+                },
+                {
+                    "pctTM": 0.95,
+                    "reps": 1
+                }
+            ],
+            "rules": {
+                "lastSetOptional": true,
+                "barSpeedGate": true,
+                "noGrinders": true
+            }
+        }
+    },
+    "sessionTemplates": {
+        "SQUAT_DAY": {
+            "sessionId": "SQUAT",
+            "label": "Squat",
+            "mainLiftId": "squat",
+            "supplemental": [
+                {
+                    "type": "fsl_main_lift",
+                    "label": "FSL (Main Lift)",
+                    "sets": 5,
+                    "repsRange": [
+                        3,
+                        10
+                    ],
+                    "notes": [
+                        "Performed as part of a circuit with assistance slots."
+                    ]
+                }
+            ],
+            "assistanceSlots": [
+                {
+                    "slotId": "upper_push",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_1"
+                },
+                {
+                    "slotId": "upper_pull",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_2"
+                }
+            ],
+            "circuit": {
+                "enabled": true,
+                "rounds": 5,
+                "style": "EMOMish",
+                "notes": [
+                    "Circuit is (FSL) + (upper push) + (upper pull).",
+                    "App selects exercises for slots using exercise library + user constraints."
+                ],
+                "sequence": [
+                    "fsl_main_lift",
+                    "assistance_1",
+                    "assistance_2"
+                ],
+                "restRule": "as_needed_for_quality"
+            },
+            "conditioningSlots": [
+                {
+                    "slotId": "intervals_short",
+                    "optional": true
+                }
+            ],
+            "mobilitySlots": [
+                {
+                    "slotId": "hip_ir_er",
+                    "optional": true
+                },
+                {
+                    "slotId": "ankles",
+                    "optional": true
+                }
+            ],
+            "intent": [
+                "main_lift",
+                "fsl_circuit",
+                "assistance",
+                "conditioning_optional",
+                "mobility_optional"
+            ],
+            "circuitRef": "krypteia_fsl"
+        },
+        "BENCH_DAY": {
+            "sessionId": "BENCH",
+            "label": "Bench Press",
+            "mainLiftId": "bench",
+            "supplemental": [
+                {
+                    "type": "fsl_main_lift",
+                    "label": "FSL (Main Lift)",
+                    "sets": 5,
+                    "repsRange": [
+                        3,
+                        10
+                    ],
+                    "notes": [
+                        "Performed as part of a circuit with assistance slots."
+                    ]
+                }
+            ],
+            "assistanceSlots": [
+                {
+                    "slotId": "single_leg_or_core",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_1"
+                },
+                {
+                    "slotId": "upper_pull",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_2"
+                }
+            ],
+            "circuit": {
+                "enabled": true,
+                "rounds": 5,
+                "style": "EMOMish",
+                "notes": [
+                    "Circuit is (FSL Bench) + (single-leg or core) + (upper pull)."
+                ],
+                "sequence": [
+                    "fsl_main_lift",
+                    "assistance_1",
+                    "assistance_2"
+                ],
+                "restRule": "as_needed_for_quality"
+            },
+            "conditioningSlots": [
+                {
+                    "slotId": "intervals_short",
+                    "optional": true
+                }
+            ],
+            "mobilitySlots": [
+                {
+                    "slotId": "hip_flexor",
+                    "optional": true
+                },
+                {
+                    "slotId": "t_spine",
+                    "optional": true
+                }
+            ],
+            "intent": [
+                "main_lift",
+                "fsl_circuit",
+                "assistance",
+                "conditioning_optional",
+                "mobility_optional"
+            ],
+            "circuitRef": "krypteia_fsl"
+        },
+        "DEADLIFT_DAY": {
+            "sessionId": "DEADLIFT",
+            "label": "Deadlift",
+            "mainLiftId": "deadlift",
+            "supplemental": [
+                {
+                    "type": "fsl_main_lift",
+                    "label": "FSL (Main Lift)",
+                    "sets": 5,
+                    "repsRange": [
+                        3,
+                        5
+                    ],
+                    "notes": [
+                        "Deadlift FSL reps are typically lower than squat/bench."
+                    ]
+                }
+            ],
+            "assistanceSlots": [
+                {
+                    "slotId": "upper_push",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_1"
+                },
+                {
+                    "slotId": "upper_pull",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_2"
+                }
+            ],
+            "circuit": {
+                "enabled": true,
+                "rounds": 5,
+                "style": "EMOMish",
+                "notes": [
+                    "Circuit is (FSL Deadlift) + (upper push) + (upper pull)."
+                ],
+                "sequence": [
+                    "fsl_main_lift",
+                    "assistance_1",
+                    "assistance_2"
+                ],
+                "restRule": "as_needed_for_quality"
+            },
+            "conditioningSlots": [
+                {
+                    "slotId": "intervals_short",
+                    "optional": true
+                }
+            ],
+            "mobilitySlots": [
+                {
+                    "slotId": "hip_ir_er",
+                    "optional": true
+                },
+                {
+                    "slotId": "adductor",
+                    "optional": true
+                }
+            ],
+            "intent": [
+                "main_lift",
+                "fsl_circuit_low_rep",
+                "assistance",
+                "conditioning_optional",
+                "mobility_optional"
+            ],
+            "circuitRef": "krypteia_fsl"
+        },
+        "OHP_DAY": {
+            "sessionId": "OHP",
+            "label": "Overhead Press",
+            "mainLiftId": "ohp",
+            "supplemental": [
+                {
+                    "type": "fsl_main_lift",
+                    "label": "FSL (Main Lift)",
+                    "sets": 5,
+                    "repsRange": [
+                        3,
+                        10
+                    ],
+                    "notes": [
+                        "Performed as part of a circuit with assistance slots."
+                    ]
+                }
+            ],
+            "assistanceSlots": [
+                {
+                    "slotId": "single_leg_or_core",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_1"
+                },
+                {
+                    "slotId": "upper_pull",
+                    "minReps": 10,
+                    "maxReps": 20,
+                    "alias": "assistance_2"
+                }
+            ],
+            "circuit": {
+                "enabled": true,
+                "rounds": 5,
+                "style": "EMOMish",
+                "notes": [
+                    "Press day uses (single-leg or core) + (upper pull) to balance shoulder volume."
+                ],
+                "sequence": [
+                    "fsl_main_lift",
+                    "assistance_1",
+                    "assistance_2"
+                ],
+                "restRule": "as_needed_for_quality"
+            },
+            "conditioningSlots": [
+                {
+                    "slotId": "intervals_short",
+                    "optional": true
+                }
+            ],
+            "mobilitySlots": [
+                {
+                    "slotId": "t_spine",
+                    "optional": true
+                },
+                {
+                    "slotId": "hip_flexor",
+                    "optional": true
+                }
+            ],
+            "intent": [
+                "main_lift",
+                "fsl_circuit",
+                "assistance",
+                "conditioning_optional",
+                "mobility_optional"
+            ],
+            "circuitRef": "krypteia_fsl"
+        }
+    },
+    "macrocycle": {
+        "cycleLengthWeeks": 13,
+        "phases": [
+            {
+                "phaseId": "LEADER",
+                "label": "Leader (Volume / Base)",
+                "weeks": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                ],
+                "mainLiftSchemeByWeekInCycle": {
+                    "1": "fives_pro_week_1",
+                    "2": "fives_pro_week_2",
+                    "3": "fives_pro_week_3"
+                },
+                "rules": {
+                    "allowPRSets": false,
+                    "topSetCapRPE": 8,
+                    "supplementalUsesFSL": true,
+                    "circuitRounds": 5
+                }
+            },
+            {
+                "phaseId": "DELOAD_1",
+                "label": "Deload",
+                "weeks": [
+                    7
+                ],
+                "mainLiftScheme": "deload_40_50_60",
+                "rules": {
+                    "allowPRSets": false,
+                    "supplementalEnabled": false,
+                    "circuitRounds": 2,
+                    "conditioningRecommended": "easy_only",
+                    "mobilityRecommended": true
+                }
+            },
+            {
+                "phaseId": "ANCHOR",
+                "label": "Anchor (Intensity / Realization)",
+                "weeks": [
+                    8,
+                    9,
+                    10
+                ],
+                "mainLiftSchemeByWeekInCycle": {
+                    "1": "classic_531_week_1",
+                    "2": "classic_531_week_2",
+                    "3": "classic_531_week_3"
+                },
+                "rules": {
+                    "allowPRSets": true,
+                    "prSetWeek": 10,
+                    "prSetOn": "last_work_set",
+                    "topSetCapRPE": 9,
+                    "supplementalUsesFSL": true,
+                    "circuitRounds": 3
+                }
+            },
+            {
+                "phaseId": "DELOAD_2",
+                "label": "Deload",
+                "weeks": [
+                    11
+                ],
+                "mainLiftScheme": "deload_40_50_60",
+                "rules": {
+                    "allowPRSets": false,
+                    "supplementalEnabled": false,
+                    "circuitRounds": 2,
+                    "conditioningRecommended": "easy_only",
+                    "mobilityRecommended": true
+                }
+            },
+            {
+                "phaseId": "TEST",
+                "label": "Test Week",
+                "weeks": [
+                    12
+                ],
+                "rules": {
+                    "testType": "1rm",
+                    "testOrder": [
+                        "squat",
+                        "bench",
+                        "deadlift",
+                        "ohp"
+                    ],
+                    "separateDaysRecommended": true,
+                    "noMisses": true,
+                    "stopOnGrind": true
+                }
+            },
+            {
+                "phaseId": "RESET",
+                "label": "Reset / Start Next Cycle",
+                "weeks": [
+                    13
+                ],
+                "rules": {
+                    "action": "recalculate_tm_and_restart",
+                    "defaultTmPercent": 0.85,
+                    "notes": [
+                        "App should prompt user to confirm new 1RMs (from test week) and recalculate TMs.",
+                        "Then restart macrocycle at Week 1."
+                    ]
+                }
+            }
+        ],
+        "weeklySessions": [
+            {
+                "slotIndex": 1,
+                "sessionTemplateRef": "SQUAT_DAY"
+            },
+            {
+                "slotIndex": 2,
+                "sessionTemplateRef": "BENCH_DAY"
+            },
+            {
+                "slotIndex": 3,
+                "sessionTemplateRef": "DEADLIFT_DAY"
+            },
+            {
+                "slotIndex": 4,
+                "sessionTemplateRef": "OHP_DAY"
+            }
+        ]
+    },
+    "circuitTemplates": {
+        "krypteia_fsl": {
+            "enabled": true,
+            "style": "EMOMish",
+            "sequence": [
+                "fsl_main_lift",
+                "assistance_1",
+                "assistance_2"
+            ],
+            "defaultRounds": 5,
+            "restRule": "as_needed_for_quality"
+        }
+    },
+    "nonLiftingDayTypes": {
+        "types": [
+            {
+                "typeId": "gpp_krypteia",
+                "label": "GPP / Krypteia"
+            },
+            {
+                "typeId": "mobility",
+                "label": "Mobility"
+            },
+            {
+                "typeId": "active_recovery",
+                "label": "Active Recovery"
+            },
+            {
+                "typeId": "pilates",
+                "label": "Pilates"
+            }
+        ]
+    }
 }

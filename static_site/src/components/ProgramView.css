@@ -281,7 +281,7 @@
 
 .sessions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -573,6 +573,193 @@
   font-size: 14px;
   font-weight: 400;
   color: #78350f;
+}
+
+.non-lifting-workout {
+  padding: 20px 0;
+}
+
+.workout-notes {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.workout-notes p {
+  margin: 8px 0;
+  color: #1e40af;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.workout-notes p:first-child {
+  margin-top: 0;
+}
+
+.workout-notes p:last-child {
+  margin-bottom: 0;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exercise-item {
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.exercise-item h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.exercise-item p {
+  margin: 4px 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.exercise-notes {
+  font-style: italic;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.interactive-gpp-workout {
+  padding: 20px 0;
+}
+
+.conditioning-block {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f0f9ff;
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+}
+
+.conditioning-block h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.conditioning-block p {
+  margin: 4px 0;
+  color: #1e40af;
+  font-size: 15px;
+}
+
+.target-rpe {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.gpp-circuit-section {
+  margin-top: 24px;
+}
+
+.gpp-circuit-section h4 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.exercise-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.slot-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot-selector label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slot-selector select {
+  padding: 12px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+}
+
+.slot-selector select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.slot-selector .target-reps {
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.rounds-logging {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.round-log {
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.round-log h5 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.round-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.set-log-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.set-log-row .exercise-name-small {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .btn-complete-workout {
